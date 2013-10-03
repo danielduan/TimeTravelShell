@@ -26,8 +26,8 @@
 #define PIPE 3
 #define AND 4
 #define OR 5
-#define OPEN_P 6
-#define CLOSE_P 7
+#define OPEN_SUBSHELL 6
+#define CLOSE_SUBSHELL 7
 #define L_REDIR 8
 #define R_REDIR 9
 #define NEWLINE 10
@@ -120,62 +120,153 @@ token_container* tokenizer(char* input) {
         //these should be removed already
         break;
       }
-      case ';': {
-        //break;
-      }
-      case '\n': {
-        //signifies end of command string, should end of token too
+      case ';': { //end of command string
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
         }
-
         //save character
         char* new_string = checked_malloc(2 * sizeof(char));
         new_string[0] = current_char;
         new_string[1] = '\0';
         new_token._string = new_string;
-
-        if (current_char == ';') {
-          new_token._type = SEMICOLON;
-        } else {
-          new_token._type = NEWLINE;
+        new_token._type = SEMICOLON;
+        break;
+      }
+      case '\n': { //should end of token
+        //if type is none, append current 
+        if (new_token._type != NONE) {
+          add_token(container, new_token);
         }
-
+        //save character
+        char* new_string = checked_malloc(2 * sizeof(char));
+        new_string[0] = current_char;
+        new_string[1] = '\0';
+        new_token._string = new_string;
+        new_token._type = NEWLINE;
         break;
       }
-      case '|': {
+      case '&': { //check for &&
+        if (new_token._type != NONE) { //if not new token
+          add_token(container, new_token);
+        }
+        if (input[i+1] == '&') { //if && and
+          //save character
+          char* new_string = checked_malloc(3 * sizeof(char));
+          new_string[0] = current_char;
+          new_string[1] = current_char; //obv its gonna be another '&'
+          new_string[2] = '\0';
+          new_token._string = new_string;
+          new_token._type = AND;
+        }
         break;
       }
-      case '&': {
+      case '|': { //check to see if it is OR or pipe
+        
+        if (new_token._type != NONE) { //if not new token
+          add_token(container, new_token);
+        }
+        if (input[i+1] != '|') { //if | pipe
+          //save character
+          char* new_string = checked_malloc(2 * sizeof(char));
+          new_string[0] = current_char;
+          new_string[1] = '\0';
+          new_token._string = new_string;
+          new_token._type = PIPE;
+        } else if (input[i+1] == '|') { //if || or
+          //save character
+          char* new_string = checked_malloc(3 * sizeof(char));
+          new_string[0] = current_char;
+          new_string[1] = current_char; //obv its gonna be another '|'
+          new_string[2] = '\0';
+          new_token._string = new_string;
+          new_token._type = OR;
+          //skip the next character too
+          i+=1;
+        }
         break;
       }
-      case '(': {
+      case '<': { //subshell input
+        if (new_token._type != NONE) { //if not new token
+          add_token(container, new_token);
+        }
+        //save character
+        char* new_string = checked_malloc(2 * sizeof(char));
+        new_string[0] = current_char;
+        new_string[1] = '\0';
+        new_token._string = new_string;
+        new_token._type = L_REDIR;
         break;
       }
-      case ')': {
+      case '>': { //subshell output
+        if (new_token._type != NONE) { //if not new token
+          add_token(container, new_token);
+        }
+        //save character
+        char* new_string = checked_malloc(2 * sizeof(char));
+        new_string[0] = current_char;
+        new_string[1] = '\0';
+        new_token._string = new_string;
+        new_token._type = R_REDIR;
         break;
       }
-      case '<': {
+      case '(': { //subshell start
+        if (new_token._type != NONE) { //if not new token
+          add_token(container, new_token);
+        }
+        //save character
+        char* new_string = checked_malloc(2 * sizeof(char));
+        new_string[0] = current_char;
+        new_string[1] = '\0';
+        new_token._string = new_string;
+        new_token._type = OPEN_SUBSHELL;
         break;
       }
-      case '>': {
+      case ')': { //subsheell end
+        if (new_token._type != NONE) { //if not new token
+          add_token(container, new_token);
+        }
+        //save character
+        char* new_string = checked_malloc(2 * sizeof(char));
+        new_string[0] = current_char;
+        new_string[1] = '\0';
+        new_token._string = new_string;
+        new_token._type = CLOSE_SUBSHELL;
         break;
       }
-      case '\t': {
-        break;
-      }
-      case ' ': {
-        break;
+      
+      case ' ': { //spaces
+        if (curr.type != STRING){ //ignore if space is inside STRING
+          break;
+        } //otherwise, let default STRING handling take care of it
       }
       default: {
+        if (new_token._type != STRING) { //catch all, save token
+          if (new_token._type != NONE) { //if not new token
+            add_token(container, new_token);
+          }
+          //save character
+          char* new_string = checked_malloc(sizeof(char));
+          new_string[0] = '\0';
+          new_token._string = new_string;
+          new_token._type = STRING;
+        }
+        //add character to the end of string
+        int current_length = strlen(new_token._string)
+        new_token._string = checked_realloc(string, current_length+1);
+        new_token._string[current_length] = current_char;
+        new_token._string[current_length+1] = '\0';
         break;
       }
     }
   }
 
-
-
+  //commit last token at the end
+  if (new_token._type != NONE) { //if not new token
+    add_token(container, new_token);
+  }
+  //return container after everything is processed
+  return container;
 }
 
 
