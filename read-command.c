@@ -94,7 +94,11 @@ typedef struct {
 
 void add_token (token_container* container, token new_token) {
   container->_token = checked_realloc(container->_token, ((container->_length+1) * sizeof(token)));
+<<<<<<< HEAD
   *(container->_token + container->_length) = new_token;
+=======
+  *(container->_token + _length) = new_token;
+>>>>>>> ac79c7fccbca33941c9cd34f93d4e2079aea8186
   container->_length++;
 }
 
