@@ -101,7 +101,7 @@ void add_token (token_container* container, token new_token) {
 /* separates input string into tokens and returns size */
 token_container* tokenizer(char* input) {
   // intialize return token container
-  token_container container = checked_malloc(sizeof(token_container));
+  token_container* container = checked_malloc(sizeof(token_container));
   container->_token = NULL;
   container->_length = 0;
 
@@ -128,7 +128,7 @@ token_container* tokenizer(char* input) {
         //signifies end of command string, should end of token too
         //if type is none, append current 
         if (new_token._type != NONE) {
-          token_container = add_token(token_container, new_token);
+          add_token(container, new_token);
         }
 
         //save character
@@ -137,7 +137,7 @@ token_container* tokenizer(char* input) {
         new_string[1] = '\0';
         new_token._string = new_string;
 
-        if (c == ';') {
+        if (current_char == ';') {
           new_token._type = SEMICOLON;
         } else {
           new_token._type = NEWLINE;
