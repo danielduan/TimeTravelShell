@@ -19,6 +19,7 @@
 #include <string.h>
 #include <ctype.h>
 
+//defines type of token
 #define NONE 0
 #define STRING 1
 #define SEMICOLON 2
@@ -35,8 +36,7 @@
 /* FIXME: Define the type 'struct command_stream' here.  This should
    complete the incomplete type declaration in command.h.  */
 
-
-//Our own defined structure here
+/* holds commands */
 struct command_stream
 {
   int size;
@@ -127,7 +127,7 @@ token_container* tokenizer(char* input) {
         //signifies end of command string, should end of token too
         //if type is none, append current 
         if (new_token._type != NONE) {
-          token_container = add_token(token_container, new_token);
+          add_token(container, new_token);
         }
 
         //save character
@@ -136,7 +136,7 @@ token_container* tokenizer(char* input) {
         new_string[1] = '\0';
         new_token._string = new_string;
 
-        if (c == ';') {
+        if (current_char == ';') {
           new_token._type = SEMICOLON;
         } else {
           new_token._type = NEWLINE;
@@ -264,7 +264,6 @@ make_command_stream (int (*get_next_byte) (void *),
     {
     printf("%c",buf[i]);
     }
-  error (1, 0, "command reading not yet implemented");
 
   return 0;
 }
