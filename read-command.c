@@ -75,22 +75,26 @@ void append(char* string, char c)
   string[len+1] = '\0';
 }
 
+//removes last character
 void remove_last_char(char* string)
 {
   int len = strlen(string);
   string[len-1] = '\0';
 }
 
+//holds individual tokens
 typedef struct {
   int _type;
   char* _string;
 } token;
 
+//holds all tokens from tokenizer
 typedef struct {
   token* _token;
   int _length;
 } token_container;
 
+//adds token to token container
 void add_token (token_container* container, token new_token) {
   container->_token = checked_realloc(container->_token, ((container->_length+1) * sizeof(token)));
   *(container->_token + container->_length) = new_token;
