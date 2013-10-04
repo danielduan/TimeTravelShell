@@ -92,13 +92,16 @@ typedef struct {
 typedef struct {
   token* _token;
   int _length;
+  int _totaltokens;
 } token_container;
 
 //adds token to token container
 void add_token (token_container* container, token new_token) {
   container->_token = checked_realloc(container->_token, ((container->_length+1) * sizeof(token)));
   *(container->_token + container->_length) = new_token;
-  container->_length++;
+  //container->_length++; THIS SHIT WAS CAUSING PROBLEMS
+  container->_totaltokens++; //Counts total number of tokens added
+  printf("%s\n",new_token._string );
 }
 
 /* separates input string into tokens and returns size */
@@ -107,6 +110,7 @@ token_container* tokenizer(char* input) {
   token_container* container = checked_malloc(sizeof(token_container));
   container->_token = NULL;
   container->_length = 0;
+  container->_totaltokens = 0;
 
   // create new token
   token new_token;
@@ -121,12 +125,10 @@ token_container* tokenizer(char* input) {
     char current_char = input[i];
     switch(current_char) {
       case '#': {
-        printf("%s\n","hash");
         //these should be removed already
         break;
       }
       case ';': { //end of command string
-        printf("%s\n","semicolon");
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
@@ -140,7 +142,6 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '\n': { //should end of token
-        printf("%s\n","newline");
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
@@ -154,7 +155,6 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '&': { //check for &&
-        printf("%s\n","and");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -166,15 +166,16 @@ token_container* tokenizer(char* input) {
           new_string[2] = '\0';
           new_token._string = new_string;
           new_token._type = AND;
+          //skip the next character too
+          i+=1;
         }
         break;
       }
       case '|': { //check to see if it is OR or pipe
-        printf("%s\n","or");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
-        if (i == strlen(input) - 1 || i == input[i+1] != '|') { //if | pipe
+        if (input[i+1] != '|') { //if | pipe
           //save character
           char* new_string = checked_malloc(2 * sizeof(char));
           new_string[0] = current_char;
@@ -195,7 +196,6 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '<': { //subshell input
-        printf("%s\n","less than");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -208,7 +208,6 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '>': { //subshell output
-        printf("%s\n","greater than");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -221,7 +220,6 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '(': { //subshell start
-        printf("%s\n","open paran");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -234,7 +232,6 @@ token_container* tokenizer(char* input) {
         break;
       }
       case ')': { //subsheell end
-        printf("%s\n","close paran");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -248,19 +245,11 @@ token_container* tokenizer(char* input) {
       }
     
       case ' ': { //spaces
-        printf("%s\n","space");
         if (new_token._type != STRING){ //ignore if space is inside STRING
           break;
         } //otherwise, let default STRING handling take care of it
       }
-      case 'EOF': { //spaces
-        printf("%s\n", "END OF LINE");
-        if (new_token._type != STRING){ //ignore if space is inside STRING
-          return;
-        } //otherwise, let default STRING handling take care of it
-      }
       default: {
-        printf("%s\n","default");
         if (new_token._type != STRING) { //catch all, save token
           if (new_token._type != NONE) { //if not new token
             add_token(container, new_token);
@@ -369,16 +358,18 @@ make_command_stream (int (*get_next_byte) (void *),
         count++;
       }
   }
-  printf("%s\n","GOT HERE");
   token_container* tokens = tokenizer(buf);
 
-
   //DEBUGGING PURPOSES
-  //printf("%i",tokens->_length);
-  /*int i;
-  for(i = 0; i < tokens->_length; i++)
+  printf("%s\n","NOW DOING REAL WORK");
+  printf("%i\n",tokens->_totaltokens);
+  int i;
+  //printf("%s\n",tokens->_token[0]._type);
+  /*for(i = 0; i < 1; i++)
     {
-    printf("%c",tokens->_token[i]);
+    printf("%s\n","STARTED");
+    printf("%s\n",tokens->_token[i]._string);
+    printf("%s\n","ENDED");
     }*/
 
   return 0;
