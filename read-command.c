@@ -82,26 +82,47 @@ void remove_last_char(char* string)
   string[len-1] = '\0';
 }
 
-//holds individual tokens
-typedef struct {
+//holds individual tokens, linked list structure
+
+struct node {
   int _type;
   char* _string;
-} token;
+  struct node* _next;
+  struct node* _prev;
+};
+
+typedef struct node token;
 
 //holds all tokens from tokenizer
 typedef struct {
   token* _token;
-  int _length;
-  int _totaltokens;
+  token* _last_token;
+  size_t _totaltokens;
 } token_container;
 
 //adds token to token container
 void add_token (token_container* container, token new_token) {
-  container->_token = checked_realloc(container->_token, ((container->_length+1) * sizeof(token)));
-  *(container->_token + container->_length) = new_token;
-  //container->_length++; THIS SHIT WAS CAUSING PROBLEMS
+  //printf("adding %s, %i\n", new_token._string, container->_totaltokens+1);
+  
+  //allocate new token and copy over token content
+  token* add_token = (token*)checked_malloc(sizeof(token));
+  add_token->_type = new_token._type;
+  add_token->_string = new_token._string;
+  add_token->_next = NULL;
+
+  //add first token and set head/tail
+  if (container->_token == NULL) {
+    add_token->_prev = NULL;
+    container->_token = add_token;
+    container->_last_token = add_token;
+  } else { //add to end of linked list
+    add_token->_prev = container->_last_token;
+    container->_last_token->_next = add_token;
+    container->_last_token = add_token;
+  }
+  
   container->_totaltokens++; //Counts total number of tokens added
-  printf("%s\n",new_token._string );
+  
 }
 
 /* separates input string into tokens and returns size */
@@ -109,7 +130,7 @@ token_container* tokenizer(char* input) {
   // intialize return token container
   token_container* container = checked_malloc(sizeof(token_container));
   container->_token = NULL;
-  container->_length = 0;
+  //container->_length = 0;
   container->_totaltokens = 0;
 
   // create new token
@@ -365,13 +386,17 @@ make_command_stream (int (*get_next_byte) (void *),
   printf("%i\n",tokens->_totaltokens);
   int i;
   
-  printf("%s\n",tokens->_token->_string);
-    for(i = 0; i < 1; i++)
-    {
-    printf("%s\n","STARTED");
-    printf("%s\n",tokens->(_token + i)->_string);
-    printf("%s\n","ENDED");
-    }
+  token* token_iter = tokens->_token;
+  while (token_iter != NULL) {
+    printf("%s\n",token_iter->_string);
+    token_iter = token_iter->_next;
+  }
+  printf("%s\n","BACKWARDS!!!!");
+  token_iter = tokens->_last_token;
+  while (token_iter != NULL) {
+    printf("%s\n",token_iter->_string);
+    token_iter = token_iter->_prev;
+  }
 
   return 0;
 }

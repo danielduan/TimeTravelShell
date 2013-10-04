@@ -1,3 +1,6 @@
+cat < a || ls foo > b
+
+
 true
 
 g++ -c foo.c
