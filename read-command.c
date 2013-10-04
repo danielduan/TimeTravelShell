@@ -126,7 +126,7 @@ token_container* tokenizer(char* input) {
         break;
       }
       case ';': { //end of command string
-        printf("%s %c \n","hash", semicolon);
+        printf("%s %c \n","semicolon", current_char);
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
