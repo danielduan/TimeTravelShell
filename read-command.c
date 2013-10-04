@@ -125,6 +125,50 @@ void add_token (token_container* container, token new_token) {
   
 }
 
+///////////////////////////////////////////////////
+//Stack, used for building our commands
+typedef struct stack
+{
+    token* _command;
+    struct stack* _next;
+    struct stack* _prev;
+}mystack;
+
+void push(mystack* stack, token* command)
+{
+  mystack temp;
+  temp._command = command;
+  temp._next = NULL;
+  temp._prev = stack;
+  stack = &temp;
+  //Prints out the right string
+  //printf("%s", "JUST ADDED");
+  //printf("%s\n", stack->_command->_string);
+}
+
+void pop(mystack* stack)
+{
+  //NEED TO FIX THIS, TOO TIRED RIGHT NOW
+  //if(stack->_prev == NULL)
+  //  error(1,0,"The stack is empty");
+  //else{
+    //mystack* temp = (mystack*)checked_malloc(sizeof(mystack));
+    //temp = stack;
+  //  stack->_next = NULL;
+//    free(temp);//}
+    stack = stack->_prev;
+
+}
+
+token* peek(mystack* stack)
+{
+  //printf("%s\n",stack->_command);
+  return stack->_command;
+}
+
+///////////////////////////////////////////////////
+///////////////////////////////////////////////////
+
 /* separates input string into tokens and returns size */
 token_container* tokenizer(char* input) {
   // intialize return token container
@@ -387,7 +431,7 @@ make_command_stream (int (*get_next_byte) (void *),
   int i;
   
   token* token_iter = tokens->_token;
-  while (token_iter != NULL) {
+  /*while (token_iter != NULL) {
     printf("%s\n",token_iter->_string);
     token_iter = token_iter->_next;
   }
@@ -396,8 +440,25 @@ make_command_stream (int (*get_next_byte) (void *),
   while (token_iter != NULL) {
     printf("%s\n",token_iter->_string);
     token_iter = token_iter->_prev;
-  }
+  }*/
 
+  //CHECK STACKS
+  printf("%s\n","NOW CHECKING STACKS");
+  mystack* temp = (mystack*)checked_malloc(sizeof(mystack));
+  token* command = (token*)checked_malloc(sizeof(token));
+  temp->_command = token_iter;
+  temp->_next = NULL;
+  temp->_prev = NULL;
+  push(temp,token_iter);
+  token* peeker = peek(temp);
+  printf("%s\n", peeker->_string);
+  push(temp,token_iter->_next);
+  //NOT PRINTING OUT THE RIGHT THING, NEED TO FIX THE PUSH
+  token* peeker1 = peek(temp);
+  printf("%s\n", peeker1->_string);
+  pop(temp);
+  token* peeker2 = peek(temp);
+  printf("%s\n", peeker2->_string);
   return 0;
 }
 
