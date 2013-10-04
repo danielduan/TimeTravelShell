@@ -377,13 +377,14 @@ make_command_stream (int (*get_next_byte) (void *),
   printf("%s\n","NOW DOING REAL WORK");
   printf("%i\n",tokens->_totaltokens);
   int i;
-  //printf("%s\n",tokens->_token[0]._type);
-  /*for(i = 0; i < 1; i++)
+  
+  printf("%s\n",tokens->_token->_string);
+    for(i = 0; i < 1; i++)
     {
     printf("%s\n","STARTED");
-    printf("%s\n",tokens->_token[i]._string);
+    printf("%s\n",tokens->(_token + i)->_string);
     printf("%s\n","ENDED");
-    }*/
+    }
 
   return 0;
 }
