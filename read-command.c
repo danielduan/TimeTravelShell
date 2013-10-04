@@ -254,6 +254,12 @@ token_container* tokenizer(char* input) {
           break;
         } //otherwise, let default STRING handling take care of it
       }
+      case 'EOF': { //spaces
+        printf("%s\n", "END OF LINE");
+        if (new_token._type != STRING){ //ignore if space is inside STRING
+          return;
+        } //otherwise, let default STRING handling take care of it
+      }
       default: {
         printf("%s\n","default");
         if (new_token._type != STRING) { //catch all, save token
@@ -267,6 +273,7 @@ token_container* tokenizer(char* input) {
           new_token._type = STRING;
         }
         //add character to the end of string
+
         int current_length = strlen(new_token._string);
         new_token._string = checked_realloc(new_token._string, current_length+1);
         new_token._string[current_length] = current_char;
@@ -325,7 +332,7 @@ make_command_stream (int (*get_next_byte) (void *),
     }
 
     //Get rid of spaces
-    if(last_char == ' ' && current == ' '|| current == '\t' || line_begin == true && current == ' ')
+    if((last_char == ' ' && current == ' ')|| current == '\t' || (line_begin == true && current == ' '))
     {
       continue;
     }
@@ -364,8 +371,7 @@ make_command_stream (int (*get_next_byte) (void *),
       }
   }
   printf("%s\n","GOT HERE");
-  token_container* tokens = checked_malloc(sizeof(token_container));
-  tokens = tokenizer(buf);
+  token_container* tokens = tokenizer(buf);
 
 
   //DEBUGGING PURPOSES
