@@ -114,8 +114,8 @@ token_container* tokenizer(char* input) {
   new_token._type = NONE;
 
   //iterator
-  int i;
-  for (i = 0; i < strlen(input); i++) {
+  unsigned int i;
+  for (i = 0; i < strlen(input) -1; i++) {
     //iterate through char array and check each character
     //for possible tokens
     char current_char = input[i];
@@ -170,7 +170,7 @@ token_container* tokenizer(char* input) {
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
-        if (input[i+1] != '|') { //if | pipe
+        if (i == input[i+1] != '|') { //if | pipe
           //save character
           char* new_string = checked_malloc(2 * sizeof(char));
           new_string[0] = current_char;
