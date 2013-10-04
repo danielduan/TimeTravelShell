@@ -130,40 +130,31 @@ void add_token (token_container* container, token new_token) {
 typedef struct stack
 {
     token* _command;
-    struct stack* _next;
+    //struct stack* _next;
     struct stack* _prev;
-}mystack;
+}* mystack;
 
 void push(mystack* stack, token* command)
 {
-  mystack temp;
-  temp._command = command;
-  temp._next = NULL;
-  temp._prev = stack;
-  stack = &temp;
-  //Prints out the right string
-  //printf("%s", "JUST ADDED");
-  //printf("%s\n", stack->_command->_string);
+  mystack temp = (mystack)checked_malloc(sizeof(struct stack));
+  temp->_command = command;
+  temp->_prev = *stack;
+  *stack = temp;
 }
 
 void pop(mystack* stack)
 {
-  //NEED TO FIX THIS, TOO TIRED RIGHT NOW
-  //if(stack->_prev == NULL)
-  //  error(1,0,"The stack is empty");
-  //else{
-    //mystack* temp = (mystack*)checked_malloc(sizeof(mystack));
-    //temp = stack;
-  //  stack->_next = NULL;
-//    free(temp);//}
-    stack = stack->_prev;
+  if((*stack)->_prev == NULL)
+    printf("%s\n", "STACK IS EMPTY");
+    mystack temp = *stack;
+    *stack = (*stack)->_prev;
+    free(temp);//}
 
 }
 
 token* peek(mystack* stack)
 {
-  //printf("%s\n",stack->_command);
-  return stack->_command;
+  return (*stack)->_command;
 }
 
 ///////////////////////////////////////////////////
@@ -444,21 +435,22 @@ make_command_stream (int (*get_next_byte) (void *),
 
   //CHECK STACKS
   printf("%s\n","NOW CHECKING STACKS");
-  mystack* temp = (mystack*)checked_malloc(sizeof(mystack));
-  token* command = (token*)checked_malloc(sizeof(token));
-  temp->_command = token_iter;
-  temp->_next = NULL;
-  temp->_prev = NULL;
-  push(temp,token_iter);
-  token* peeker = peek(temp);
+  //Initializing a stack and setting it to NULL
+  mystack temp = NULL;
+  //Pushing cat into stack
+  push(&temp,token_iter);
+  //Pushing < into stack
+  push(&temp,token_iter->_next);
+  token* peeker = peek(&temp);
+  //Taking a peek at <
   printf("%s\n", peeker->_string);
-  push(temp,token_iter->_next);
-  //NOT PRINTING OUT THE RIGHT THING, NEED TO FIX THE PUSH
-  token* peeker1 = peek(temp);
-  printf("%s\n", peeker1->_string);
-  pop(temp);
-  token* peeker2 = peek(temp);
-  printf("%s\n", peeker2->_string);
+  //Popping off <
+  pop(&temp);
+  peeker = peek(&temp);
+  //Prints out cat
+  printf("%s\n", peeker->_string);
+  //Popping off again, but this time should give error since stack is empty
+  pop(&temp);
   return 0;
 }
 
