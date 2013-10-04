@@ -121,10 +121,12 @@ token_container* tokenizer(char* input) {
     char current_char = input[i];
     switch(current_char) {
       case '#': {
+        printf("%s\n","hash");
         //these should be removed already
         break;
       }
       case ';': { //end of command string
+        printf("%s\n","semicolon");
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
@@ -138,6 +140,7 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '\n': { //should end of token
+        printf("%s\n","newline");
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
@@ -151,6 +154,7 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '&': { //check for &&
+        printf("%s\n","and");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -166,7 +170,7 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '|': { //check to see if it is OR or pipe
-        
+        printf("%s\n","or");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -191,6 +195,7 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '<': { //subshell input
+        printf("%s\n","less than");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -203,6 +208,7 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '>': { //subshell output
+        printf("%s\n","greater than");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -215,6 +221,7 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '(': { //subshell start
+        printf("%s\n","open paran");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -227,6 +234,7 @@ token_container* tokenizer(char* input) {
         break;
       }
       case ')': { //subsheell end
+        printf("%s\n","close paran");
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
@@ -240,11 +248,13 @@ token_container* tokenizer(char* input) {
       }
     
       case ' ': { //spaces
+        printf("%s\n","space");
         if (new_token._type != STRING){ //ignore if space is inside STRING
           break;
         } //otherwise, let default STRING handling take care of it
       }
       default: {
+        printf("%s\n","default");
         if (new_token._type != STRING) { //catch all, save token
           if (new_token._type != NONE) { //if not new token
             add_token(container, new_token);
