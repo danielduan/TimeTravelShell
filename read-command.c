@@ -125,18 +125,10 @@ token_container* tokenizer(char* input) {
     char current_char = input[i];
     switch(current_char) {
       case '#': {
-<<<<<<< HEAD
-=======
-        printf("%s %c \n","hash", current_char);
->>>>>>> df709c863395d94cb0fc67b9cc5981d30eac2bbb
         //these should be removed already
         break;
       }
       case ';': { //end of command string
-<<<<<<< HEAD
-=======
-        printf("%s %c \n","semicolon", current_char);
->>>>>>> df709c863395d94cb0fc67b9cc5981d30eac2bbb
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
@@ -180,11 +172,6 @@ token_container* tokenizer(char* input) {
         break;
       }
       case '|': { //check to see if it is OR or pipe
-<<<<<<< HEAD
-=======
-        printf("%s %c \n","or", current_char);
-        printf("%i \n", i);
->>>>>>> df709c863395d94cb0fc67b9cc5981d30eac2bbb
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
