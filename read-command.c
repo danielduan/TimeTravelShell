@@ -414,14 +414,36 @@ make_command_stream (int (*get_next_byte) (void *),
         count++;
       }
   }
+
+  //tokenize the input
   token_container* tokens = tokenizer(buf);
+
+  //Use postfix and stacks to process the commands
+
+  token* token_iter = tokens->_token;
+
+  //stacks to hold commands and operators
+  mystack commands = NULL;
+  mystack operators = NULL;
+
+  //loop through list of tokens to process
+  while (token_iter != NULL) {
+    printf("pushing: %s\n",token_iter->_string);
+
+    switch (token_iter->_type) {
+      
+    }
+
+
+    //go to next token
+    token_iter = token_iter->_prev;
+  }
 
   //DEBUGGING PURPOSES
   printf("%s\n","NOW DOING REAL WORK");
   printf("%i\n",tokens->_totaltokens);
   int i;
   
-  token* token_iter = tokens->_token;
   /*while (token_iter != NULL) {
     printf("%s\n",token_iter->_string);
     token_iter = token_iter->_next;
