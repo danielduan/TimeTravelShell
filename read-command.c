@@ -130,12 +130,12 @@ void add_token (token_container* container, token new_token) {
 //Stack, used for building our commands
 typedef struct stack
 {
-    token* _command;
+    command_t* _command;
     //struct stack* _next;
     struct stack* _prev;
 }* mystack;
 
-void push(mystack* stack, token* command)
+void push(mystack* stack, command_t* command)
 {
   mystack temp = (mystack)checked_malloc(sizeof(struct stack));
   temp->_command = command;
@@ -150,7 +150,7 @@ void pop(mystack* stack)
     free(temp);//}
 }
 
-token* peek(mystack* stack)
+command_t peek(mystack* stack)
 {
   return (*stack)->_command;
 }
@@ -356,27 +356,26 @@ command_t make_command(tokenlist* list) {
         break;
       }
       case STRING: {
+        //create command_t
         command_t words = (command_t) checked_malloc(sizeof(struct command));
         words->type = SIMPLE_COMMAND;
         char** dblptr = (char**)checked_malloc(sizeof(char*));
-        *dblptr = (char*)(peeknext->_string);
-        new_command->u.word = dblptr;
-        words->u.word = token_iter->_string;
-        words->input = in->input;
-        words->output = in->output;
-        stack_push(&operandTop, words);
+        *dblptr = (char*)(token_iter->_string);
+        words->u.word = dblptr;
+        //needs rework
+        words->input = NULL;
+        words->output = NULL;
+        push(&operators, words);
         break;
       }
-      case SEMICOLON: {
-        break;
-      }
-      case PIPE: {
-        break;
-      }
-      case AND: {
-        break;
-      }
+      case SEMICOLON:
+      case PIPE:
+      case AND:
       case OR: {
+        if (operators!=NULL &&
+          (peek(&operators)->data->type == PIPE_COMMAND ||
+          ((peek(&operators)->data->type == AND_COMMAND ||
+          operatorTop->data->type == OR_COMMAND) && in->type != pipes)))
         break;
       }
       case OPEN_SUBSHELL: {
