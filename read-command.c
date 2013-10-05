@@ -333,6 +333,78 @@ token_container* tokenizer(char* input) {
   return container;
 }
 
+//use this function to convert list of tokens into command_t
+command_t make_command(tokenlist* list) {
+  //catch null list
+  if (list == NULL) {
+    return NULL;
+  }
+
+  //Use postfix and stacks to process the commands
+  token* token_iter = list->_token;
+
+  //two stacks, one to hold commands, one to hold operands
+  mystack commands = NULL;
+  mystack operators = NULL;
+
+  //loop through list of tokens to process
+  while (token_iter != NULL) {
+    printf("pushing: %s\n",token_iter->_string);
+
+    switch (token_iter->_type) {
+      case NONE: {
+        break;
+      }
+      case STRING: {
+        command_t words = (command_t) checked_malloc(sizeof(struct command));
+        words->type = SIMPLE_COMMAND;
+        char** dblptr = (char**)checked_malloc(sizeof(char*));
+        *dblptr = (char*)(peeknext->_string);
+        new_command->u.word = dblptr;
+        words->u.word = token_iter->_string;
+        words->input = in->input;
+        words->output = in->output;
+        stack_push(&operandTop, words);
+        break;
+      }
+      case SEMICOLON: {
+        break;
+      }
+      case PIPE: {
+        break;
+      }
+      case AND: {
+        break;
+      }
+      case OR: {
+        break;
+      }
+      case OPEN_SUBSHELL: {
+        break;
+      }
+      case CLOSE_SUBSHELL: {
+        break;
+      }
+      case L_REDIR: {
+        break;
+      }
+      case R_REDIR: {
+        break;
+      }
+      case NEWLINE: {
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+
+
+    //go to next token
+    token_iter = token_iter->_next;
+  }
+}
+
 command_t stack_to_stream (mystack* operands, mystack* operators)
 {
   command_stream_t command_list = checked_malloc(sizeof(struct command_stream));
@@ -450,26 +522,7 @@ make_command_stream (int (*get_next_byte) (void *),
   //tokenize the input
   token_container* tokens = tokenizer(buf);
 
-  //Use postfix and stacks to process the commands
-
-  token* token_iter = tokens->_token;
-
-  //stacks to hold commands and operators
-  mystack commands = NULL;
-  mystack operators = NULL;
-
-  //loop through list of tokens to process
-  while (token_iter != NULL) {
-    printf("pushing: %s\n",token_iter->_string);
-
-    switch (token_iter->_type) {
-      
-    }
-
-
-    //go to next token
-    token_iter = token_iter->_prev;
-  }
+  
 
   //DEBUGGING PURPOSES
   printf("%s\n","NOW DOING REAL WORK");
