@@ -130,12 +130,12 @@ void add_token (token_container* container, token new_token) {
 //Stack, used for building our commands
 typedef struct stack
 {
-    command_t* _command;
+    command_t _command;
     //struct stack* _next;
     struct stack* _prev;
 }* mystack;
 
-void push(mystack* stack, command_t* command)
+void push(mystack* stack, command_t command)
 {
   mystack temp = (mystack)checked_malloc(sizeof(struct stack));
   temp->_command = command;
@@ -334,7 +334,7 @@ token_container* tokenizer(char* input) {
 }
 
 //use this function to convert list of tokens into command_t
-command_t make_command(tokenlist* list) {
+command_t make_command(token_container* list) {
   //catch null list
   if (list == NULL) {
     return NULL;
@@ -373,9 +373,9 @@ command_t make_command(tokenlist* list) {
       case AND:
       case OR: {
         if (operators!=NULL &&
-          (peek(&operators)->data->type == PIPE_COMMAND ||
-          ((peek(&operators)->data->type == AND_COMMAND ||
-          operatorTop->data->type == OR_COMMAND) && in->type != pipes)))
+          (peek(&operators)->type == PIPE_COMMAND ||
+          ((peek(&operators)->type == AND_COMMAND ||
+          operators->_command->type == OR_COMMAND) && token_iter->_type != PIPE)))
         break;
       }
       case OPEN_SUBSHELL: {
@@ -521,8 +521,6 @@ make_command_stream (int (*get_next_byte) (void *),
   //tokenize the input
   token_container* tokens = tokenizer(buf);
 
-  
-
   //DEBUGGING PURPOSES
   printf("%s\n","NOW DOING REAL WORK");
   printf("%i\n",tokens->_totaltokens);
@@ -532,7 +530,7 @@ make_command_stream (int (*get_next_byte) (void *),
     push(&operands,token_iter);
     token_iter = token_iter->_next;
   }*/
-
+  /*
   //Creating test stacks to work with. 
   printf("%s\n","NOW CHECKING STACKS");
   //Operands stack holds [cat|a], operator stack hold [<]
@@ -556,8 +554,8 @@ make_command_stream (int (*get_next_byte) (void *),
   push(&operands,tokens->_token);
 
   //Adds a new command to command stream, command should be 'a<cat' and is accessed with commands[1]
-  command_list->commands[command_list->_size] = stack_to_stream(&operands,&operators);
-  return command_list;
+  command_list->commands[command_list->_size] = stack_to_stream(&operands,&operators);*/
+  return 0;
 }
 
 command_t
