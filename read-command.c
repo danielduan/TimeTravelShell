@@ -418,7 +418,7 @@ command_t make_command(token_container* list) {
         break;
       }
       default: {
-        command_t sign = (command_t) checked_malloc(sizeof(struct command));
+        command_t op = (command_t) checked_malloc(sizeof(struct command));
         if (token_iter->_type == AND) {
           op->type = AND_COMMAND;
         } else if (token_iter->_type == OR) {
@@ -428,7 +428,7 @@ command_t make_command(token_container* list) {
         } else if (token_iter->_type == SEMICOLON) {
           op->type = SEQUENCE_COMMAND;
         }
-        stack_push(&operatorTop, sign);
+        push(&operators, op);
         break;
       }
     }
@@ -452,7 +452,8 @@ command_t make_command(token_container* list) {
     push(&commands, words);
   }
 
-  command_t output = pop(&commands);
+  command_t output = peek(&commands);
+  pop(&commands);
   //if for whatever reason its empty, catch it.
   if (output == NULL) {
     return output;
