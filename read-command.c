@@ -391,8 +391,13 @@ command_t make_command(tokenlist* list) {
           if (token_iter->_type == AND) {
             op->type = AND_COMMAND;
           } else if (token_iter->_type == OR) {
-            ;
+            op->type = OR_COMMAND;
+          } else if (token_iter->_type == PIPE) {
+            op->type = PIPE_COMMAND;
+          } else if (token_iter->_type == SEMICOLON) {
+            op->type = SEQUENCE_COMMAND;
           }
+          push(&operators, op);
 
         }
         break;
@@ -413,6 +418,17 @@ command_t make_command(tokenlist* list) {
         break;
       }
       default: {
+        command_t sign = (command_t) checked_malloc(sizeof(struct command));
+        if (token_iter->_type == AND) {
+          op->type = AND_COMMAND;
+        } else if (token_iter->_type == OR) {
+          op->type = OR_COMMAND;
+        } else if (token_iter->_type == PIPE) {
+          op->type = PIPE_COMMAND;
+        } else if (token_iter->_type == SEMICOLON) {
+          op->type = SEQUENCE_COMMAND;
+        }
+        stack_push(&operatorTop, sign);
         break;
       }
     }
@@ -420,6 +436,33 @@ command_t make_command(tokenlist* list) {
     //go to next token
     token_iter = token_iter->_next;
   }
+
+  //iterate through list of operators and pop them
+  while(peek(&operators)) {
+    command_t words = peek(&operators);
+    pop(&operators);
+    words->u.command[1] = peek(&commands);
+    pop(&commands);
+    words->u.command[0] = peek(&commands);
+    pop(&commands);
+    if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
+      printf("%s\n", "NULL operator");
+      return NULL;
+    }
+    push(&commands, words);
+  }
+
+  command_t output = pop(&commands);
+  //if for whatever reason its empty, catch it.
+  if (output == NULL) {
+    return output;
+  } else {
+    //something wrong happened
+    printf("%s\n", "command stack empty");
+    return NULL;
+  }
+
+
 }
 
 command_t stack_to_stream (mystack* operands, mystack* operators)
