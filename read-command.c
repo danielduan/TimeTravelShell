@@ -372,10 +372,29 @@ command_t make_command(tokenlist* list) {
       case PIPE:
       case AND:
       case OR: {
-        if (operators!=NULL &&
-          (peek(&operators)->data->type == PIPE_COMMAND ||
-          ((peek(&operators)->data->type == AND_COMMAND ||
-          operatorTop->data->type == OR_COMMAND) && in->type != pipes)))
+        if (operators!=NULL && (peek(&operators)->data->type == PIPE_COMMAND || ((peek(&operators)->data->type == AND_COMMAND || peek(&operators)->data->type == OR_COMMAND) && token_iter->_type != PIPE))) {
+          //create command_t from current stuff on stack
+          command_t words = peek(&operators);
+          pop(&operators);
+          words->u.command[1] = peek(&commands);
+          pop(&commands);
+          words->u.command[0] = peek(&commands);
+          pop(&commands);
+          if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
+            printf("%s\n", "NULL operator");
+            return NULL;
+          }
+
+          push(&commands, words);
+
+          command_t op = (command_t)checked_malloc(sizeof(struct command));
+          if (token_iter->_type == AND) {
+            op->type = AND_COMMAND;
+          } else if (token_iter->_type == OR) {
+            ;
+          }
+
+        }
         break;
       }
       case OPEN_SUBSHELL: {
@@ -397,7 +416,6 @@ command_t make_command(tokenlist* list) {
         break;
       }
     }
-
 
     //go to next token
     token_iter = token_iter->_next;
