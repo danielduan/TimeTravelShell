@@ -39,9 +39,8 @@
 /* holds commands */
 struct command_stream
 {
-  int _size; //Current number of commands being held
-  int _iterator;
-  command_stream* next;
+  int size;
+  int iterator;
   command_t *commands;
 };
 
@@ -145,9 +144,12 @@ void push(mystack* stack, token* command)
 
 void pop(mystack* stack)
 {
+  if((*stack)->_prev == NULL)
+    printf("%s\n", "STACK IS EMPTY");
     mystack temp = *stack;
     *stack = (*stack)->_prev;
     free(temp);//}
+
 }
 
 token* peek(mystack* stack)
@@ -333,40 +335,6 @@ token_container* tokenizer(char* input) {
   return container;
 }
 
-command_t stack_to_stream (mystack* operands, mystack* operators)
-{
-  command_stream_t command_list = checked_malloc(sizeof(struct command_stream));
-  command_list->_size = 0; //Command_list is currently empty
-  command_t new_command = (command_t) checked_malloc(sizeof(struct command));
-  char** dblptr = (char**)checked_malloc(sizeof(char*));
-  token* peeker;
-
-  while((*operators)!=NULL)
-  {
-    peeker = peek(operators);
-    if(!strcmp(peeker->_string,"<"))
-    {
-      printf("%s\n", "REACHED A < OPERATOR:");
-      token* peektop = peek(operands);
-      pop(operands);
-      token* peeknext = peek(operands);
-      new_command->type = SIMPLE_COMMAND;
-      new_command->status = 0;
-      new_command->input = peektop->_string;
-      new_command->output = NULL;
-      *dblptr = (char*)(peeknext->_string);
-      printf("%s\n", *dblptr);
-      new_command->u.word = dblptr;
-    }
-    else
-      printf("%s\n", "WRONG OPERATOR");
-    //(*operators) = (*operators)->_prev;
-    pop(operators);
-  }
-    printf("%s\n","OPERATOR STACK IS EMPTY" );
-
-  return new_command;
-}
 
 command_stream_t
 make_command_stream (int (*get_next_byte) (void *),
@@ -381,13 +349,13 @@ make_command_stream (int (*get_next_byte) (void *),
 
   char current;
   char buf[1024] = "";
-  char last_char; //Keeps track of the last char read
-  char last_non_space_char;
+  char last_char = ""; //Keeps track of the last char read
+  char last_non_space_char = "";
   int count = 0; //Total number of char's added
   int count_line = 0; //Counts total number of lines or "commands" that we have
   bool line_begin = true; //Signifies the beginning of a line, used to remove whitespaces
   bool comment = false; //Comment becomes true if we're currently inside a comment
-  //bool paran = false; //Checks if we're currently in a ( ) NEED TO IMPLEMENT
+  bool paran = false; //Checks if we're currently in a ( )
 
 
   //Loops through the entire input
@@ -451,51 +419,39 @@ make_command_stream (int (*get_next_byte) (void *),
   //DEBUGGING PURPOSES
   printf("%s\n","NOW DOING REAL WORK");
   printf("%i\n",tokens->_totaltokens);
-  //int i;
+  int i;
   
-  //DECLARING OPERATORS AND OPERANDS STACK
-  mystack operators = NULL;
-  mystack operands = NULL;
-
   token* token_iter = tokens->_token;
-  //PUSHES EVERYTHING TO STACK
   /*while (token_iter != NULL) {
-    push(&operands,token_iter);
+    printf("%s\n",token_iter->_string);
     token_iter = token_iter->_next;
+  }
+  printf("%s\n","BACKWARDS!!!!");
+  token_iter = tokens->_last_token;
+  while (token_iter != NULL) {
+    printf("%s\n",token_iter->_string);
+    token_iter = token_iter->_prev;
   }*/
 
   //CHECK STACKS
   printf("%s\n","NOW CHECKING STACKS");
   //Initializing a stack and setting it to NULL
-  /*mystack temp = NULL;
-  token* peeker;
+  mystack temp = NULL;
+  //Pushing cat into stack
   push(&temp,token_iter);
+  //Pushing < into stack
   push(&temp,token_iter->_next);
-  push(&temp,token_iter->_next->_next);
-
-  peeker = peek(&temp);
+  token* peeker = peek(&temp);
+  //Taking a peek at <
   printf("%s\n", peeker->_string);
+  //Popping off <
   pop(&temp);
   peeker = peek(&temp);
-  printf("%s\n", peeker->_string);
-  pop(&temp);
-  peeker = peek(&temp);
+  //Prints out cat
   printf("%s\n", peeker->_string);
   //Popping off again, but this time should give error since stack is empty
-  pop(&temp); */
-
-  //Testing stack_to_stream
-
-  //peeker = peek(&operands);
-  //printf("%s\n", peeker->_string);
-  push(&operators,tokens->_token->_next);
-
-  push(&operands,tokens->_token);
-  push(&operands,tokens->_token->_next->_next);
-  command_stream_t command_list = checked_malloc(sizeof(struct command_stream));
-  command_list->_size = 0; //Command_list is currently empty
-  command_list->commands[command_list->_size] = stack_to_stream(&operands,&operators);
-  return command_list;
+  pop(&temp);
+  return 0;
 }
 
 command_t
@@ -503,5 +459,5 @@ read_command_stream (command_stream_t s)
 {
   /* FIXME: Replace this with your implementation too.  */
   //error (1, 0, "command reading not yet implemented");
-  return s->commands;
+  return 0;
 }
