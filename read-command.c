@@ -468,9 +468,11 @@ command_t make_command(token_container* list) {
         token_container* paran_list = checked_malloc(sizeof(token_container));
         paran_list->_token = NULL;
         paran_list->_totaltokens = 0;
+        token* last = NULL;
 
         //error checking needs to be implemented
         token_iter = token_iter->_next;
+        last = token_iter;
         while(token_iter != NULL)
         {
           if (token_iter->_type == CLOSE_SUBSHELL) {
@@ -478,21 +480,26 @@ command_t make_command(token_container* list) {
           } else {
             add_token(paran_list, *token_iter);
           }
+          token_iter = token_iter->_next;
+          last = token_iter;
         }
 
         //recursively call this function again
         command_t sub = make_command(paran_list);
+        printf("O SUB MAKE: %s\n",token_iter->_string);
 
         if (sub != NULL) {
           command_t words = (command_t)checked_malloc(sizeof(command_t));
           words->type = SUBSHELL_COMMAND;
+          printf("O SUB PUSH: %s\n",token_iter->_string);
           words->u.subshell_command = sub;
           push(&commands, words);
         }
 
         //move iterator to next token
-        token_iter = paran_list->_last_token->_next;
-
+        printf("O SUB NEXT: %s\n",token_iter->_string);
+        token_iter = last;
+        printf("O SUB BREAK: %s\n",token_iter->_string);
         break;
       }
       case CLOSE_SUBSHELL: {
