@@ -365,6 +365,7 @@ command_t make_command(token_container* list) {
         printf("STRING: %s\n",token_iter->_string);
         //check of redirect operators are present in operator stack
         if (peek(&operators) != NULL && peek(&operators)->type == SIMPLE_COMMAND) {
+          printf("STRING OP: %s\n",token_iter->_string);
           //create command_t from current stuff on stack
           command_t words = peek(&operators);
           pop(&operators);
@@ -372,13 +373,19 @@ command_t make_command(token_container* list) {
           //check if input or output and set params
           if (words->input != NULL) {
             words->input = *(peek(&commands)->u.word);
+            printf("STRING INPUT: %s\n",token_iter->_string);
           } else if (words->output != NULL) {
             words->output = *(peek(&commands)->u.word);
           }
           pop(&commands);
-          words->u.command[0] = peek(&commands);
-          pop(&commands);
 
+          printf("STRING WORD: %s\n",token_iter->_string);
+          words->type = SIMPLE_COMMAND;
+          char** dblptr = (char**)checked_malloc(sizeof(char*));
+          *dblptr = (char*)(token_iter->_string);
+          words->u.word = dblptr;
+          
+          printf("STRING PUSH: %s\n",token_iter->_string);
           push(&commands, words);
         } else {
           printf("STRING ELSE: %s\n",token_iter->_string);
