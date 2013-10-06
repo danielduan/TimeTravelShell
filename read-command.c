@@ -178,7 +178,7 @@ token_container* tokenizer(char* input) {
 
   //iterator
   unsigned int i;
-  for (i = 0; i < strlen(input) - 1; i++) {
+  for (i = 0; i < strlen(input); i++) {
     //iterate through char array and check each character
     //for possible tokens
     char current_char = input[i];
@@ -534,7 +534,6 @@ command_t make_command(token_container* list) {
 
   //iterate through list of operators and pop them
   while(peek(&operators) != NULL) {
-    printf("%s\n", "process stack");
     command_t words = peek(&operators);
     pop(&operators);
     words->u.command[1] = peek(&commands);
@@ -542,7 +541,7 @@ command_t make_command(token_container* list) {
     words->u.command[0] = peek(&commands);
     pop(&commands);
     if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
-      printf("%s\n", "while peek NULL operator");
+      printf("%s\n", "operator stack is NULL");
       return NULL;
     }
     push(&commands, words);
