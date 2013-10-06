@@ -1,1 +1,1 @@
-true 
+cat < a 

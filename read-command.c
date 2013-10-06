@@ -392,7 +392,7 @@ command_t make_command(token_container* list) {
           words->input = NULL;
           words->output = NULL;
 
-          push(&operators, words);
+          push(&commands, words);
         }
 
         break;
@@ -524,7 +524,7 @@ command_t make_command(token_container* list) {
   }
 
   //iterate through list of operators and pop them
-  while(peek(&operators)) {
+  while(peek(&operators) != NULL) {
     command_t words = peek(&operators);
     pop(&operators);
     words->u.command[1] = peek(&commands);
@@ -538,10 +538,12 @@ command_t make_command(token_container* list) {
     push(&commands, words);
   }
 
-  command_t output = peek(&commands);
+  command_t output =(command_t)checked_malloc(sizeof(struct command));
+  output = peek(&commands);
+  printf("THE PUSHED COMMAND IS: %s\n", *(output->u.word));
   pop(&commands);
   //if for whatever reason its empty, catch it.
-  if (output == NULL) {
+  if (output != NULL) {
     return output;
   } else {
     //something wrong happened
@@ -668,10 +670,6 @@ make_command_stream (int (*get_next_byte) (void *),
 
   //tokenize the input
   token_container* tokens = tokenizer(buf);
-
-  make_command(tokens);
-
-  
 
   //DEBUGGING PURPOSES
   //printf("%s\n","NOW DOING REAL WORK");
