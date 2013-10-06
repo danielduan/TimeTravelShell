@@ -403,9 +403,41 @@ command_t make_command(token_container* list) {
         break;
       }
       case OPEN_SUBSHELL: {
+
+        //create new list of inner token
+        token_container* paran_list = checked_malloc(sizeof(token_container));
+        paran_list->_token = NULL;
+        paran_list->_totaltokens = 0;
+
+        //error checking needs to be implemented
+        token_iter = token_iter->next;
+        while(token_iter != NULL)
+        {
+          if (token_iter->_type = CLOSE_SUBSHELL) {
+            break;
+          } else {
+            add_token(paran_list, token_iter);
+          }
+        }
+
+        //recursively call this function again
+        command_t sub = make_command(paran_list);
+
+        if (sub != NULL) {
+          command_t words = (command_t)checked_malloc(sizeof(command_t));
+          words->type = SUBSHELL_COMMAND;
+          words->u.subshell_command = sub;
+          push(&commands, words);
+        }
+
+        //move iterator to next token
+        token_iter = paran_list->_last_token->_next;
+
         break;
       }
       case CLOSE_SUBSHELL: {
+        //error because this should never happen
+        printf("%s\n", "Extra close paranthesis");
         break;
       }
       case L_REDIR: {
@@ -415,6 +447,7 @@ command_t make_command(token_container* list) {
         break;
       }
       case NEWLINE: {
+        printf("%s\n", "New line, should be end of command");
         break;
       }
       default: {
