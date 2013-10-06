@@ -388,7 +388,7 @@ command_t make_command(token_container* list) {
           printf("STRING PUSH: %s\n",token_iter->_string);
           push(&commands, words);
         } // check if && or || or | is present
-        else if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == AND_COMMAND || OR_COMMAND peek(&operators)->type == AND_COMMAND || peek(&operators)->type == PIPE_COMMAND)) {
+        else if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND || peek(&operators)->type == PIPE_COMMAND)) {
           command_t words = peek(&operators);
           pop(&operators);
 
