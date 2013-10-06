@@ -373,7 +373,9 @@ command_t make_command(token_container* list) {
           //check if input or output and set params
           if (words->input != NULL) {
             words->input = token_iter->_string;
-          } else if (words->output != NULL) {
+          } 
+
+          if (words->output != NULL) {
             words->output = token_iter->_string;
           }
 
