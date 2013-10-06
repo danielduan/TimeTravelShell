@@ -748,8 +748,8 @@ make_command_stream (int (*get_next_byte) (void *),
   command_list->_next = NULL;
   command_list->commands = checked_malloc(sizeof(struct command));
   command_list->commands[command_list->_size] = make_command(tokens);
-  printf("THE INPUT IS: %s\n", command_list->commands[command_list->_size]->input);
-  printf("THE OUTPUT IS: %s\n", command_list->commands[command_list->_size]->output);
+  //printf("THE INPUT IS: %s\n", command_list->commands[command_list->_size]->input);
+  //printf("THE OUTPUT IS: %s\n", command_list->commands[command_list->_size]->output);
   char* tester = *(command_list->commands[command_list->_size]->u.word);
   printf("%s\n", tester);
   return command_list;
