@@ -502,7 +502,7 @@ command_t make_command(token_container* list) {
         words->type = SIMPLE_COMMAND;
         //needs rework
         words->output = checked_malloc(sizeof(char));
-        words->output = '\0';
+        words->output[0] = '\0';
         push(&operators, words);
         break;
       }
@@ -719,7 +719,7 @@ make_command_stream (int (*get_next_byte) (void *),
   command_stream_t command_list = checked_malloc(sizeof(struct command_stream));
   command_list->_size = 0;
   command_list->_next = NULL;
-  command_list->commands = checked_malloc(16*sizeof(struct command));
+  command_list->commands = checked_malloc(sizeof(struct command));
   command_list->commands[command_list->_size] = make_command(tokens);
   printf("THE INPUT IS: %s\n", command_list->commands[command_list->_size]->input);
   printf("THE OUTPUT IS: %s\n", command_list->commands[command_list->_size]->output);
@@ -733,5 +733,7 @@ read_command_stream (command_stream_t s)
 {
   /* FIXME: Replace this with your implementation too.  */
   //error (1, 0, "command reading not yet implemented");
-    return s->commands[s->_size];
+    if(s->_size < 0)
+    return NULL;
+  return s->commands[s->_size--];
 }
