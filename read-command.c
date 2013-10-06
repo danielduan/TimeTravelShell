@@ -387,7 +387,23 @@ command_t make_command(token_container* list) {
           
           printf("STRING PUSH: %s\n",token_iter->_string);
           push(&commands, words);
-        } else {
+        } // check if && or || or | is present
+        else if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == AND_COMMAND || OR_COMMAND peek(&operators)->type == AND_COMMAND || peek(&operators)->type == PIPE_COMMAND)) {
+          command_t words = peek(&operators);
+          pop(&operators);
+
+          printf("STRING OP WORD: %s\n",token_iter->_string);
+
+          words->u.command[1] = peek(&commands);
+          pop(&commands);
+          words->u.command[0] = peek(&commands);
+          pop(&commands);
+          
+          printf("STRING OP PUSH: %s\n",token_iter->_string);
+          push(&commands, words);
+        
+        }
+         else {
           printf("STRING ELSE: %s\n",token_iter->_string);
 
           //create command_t
@@ -405,13 +421,14 @@ command_t make_command(token_container* list) {
 
         break;
       }
+      /*
       case SEMICOLON:
       case PIPE:
       case AND:
       case OR: {
 
         printf("SEMI: %s\n",token_iter->_string);
-        if (operators!=NULL && (peek(&operators)->type == PIPE_COMMAND || ((peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND) && token_iter->_type != PIPE))) {
+        if (commands!=NULL && (peek(&operators)->type == PIPE_COMMAND || ((peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND) && token_iter->_type != PIPE))) {
           //create command_t from current stuff on stack
           command_t words = peek(&operators);
           pop(&operators);
@@ -438,10 +455,11 @@ command_t make_command(token_container* list) {
           }
           printf("%s\n", "SEMI Pushing operator");
           push(&operators, op);
-
+        
         }
         break;
       }
+      */
       case OPEN_SUBSHELL: {
 
         printf("O SUB: %s\n",token_iter->_string);
