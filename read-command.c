@@ -541,10 +541,12 @@ command_t make_command(token_container* list) {
     push(&commands, words);
   }
 
-  command_t output = peek(&commands);
+  command_t output =(command_t)checked_malloc(sizeof(struct command));
+  output = peek(&commands);
+  printf("THE PUSHED COMMAND IS: %s\n", *(output->u.word));
   pop(&commands);
   //if for whatever reason its empty, catch it.
-  if (output == NULL) {
+  if (output != NULL) {
     return output;
   } else {
     //something wrong happened
@@ -671,10 +673,6 @@ make_command_stream (int (*get_next_byte) (void *),
 
   //tokenize the input
   token_container* tokens = tokenizer(buf);
-
-  make_command(tokens);
-
-  
 
   //DEBUGGING PURPOSES
   //printf("%s\n","NOW DOING REAL WORK");
