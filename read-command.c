@@ -145,13 +145,18 @@ void push(mystack* stack, command_t command)
 
 void pop(mystack* stack)
 {
+  if(stack != NULL && (*stack) != NULL)
+  {
     mystack temp = *stack;
     *stack = (*stack)->_prev;
-    free(temp);//}
+    free(temp);
+  }
 }
 
 command_t peek(mystack* stack)
 {
+  if(stack == NULL || *stack == NULL)
+    return NULL;
   return (*stack)->_command;
 }
 
@@ -650,8 +655,8 @@ make_command_stream (int (*get_next_byte) (void *),
   
 
   //DEBUGGING PURPOSES
-  printf("%s\n","NOW DOING REAL WORK");
-  printf("%i\n",tokens->_totaltokens);
+  //printf("%s\n","NOW DOING REAL WORK");
+  //printf("%i\n",tokens->_totaltokens);
   //int i;
   
   /*while (token_iter != NULL) {
@@ -683,7 +688,14 @@ make_command_stream (int (*get_next_byte) (void *),
 
   //Adds a new command to command stream, command should be 'a<cat' and is accessed with commands[1]
   command_list->commands[command_list->_size] = stack_to_stream(&operands,&operators);*/
-  return 0;
+
+  command_stream_t command_list = checked_malloc(sizeof(struct command_stream));
+  command_list->_size = 0;
+  command_list->_next = NULL;
+  command_list->commands = checked_malloc(16*sizeof(struct command));
+  command_list->commands[command_list->_size] = make_command(tokens);
+
+  return command_list;
 }
 
 command_t
