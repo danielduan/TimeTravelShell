@@ -356,16 +356,35 @@ command_t make_command(token_container* list) {
         break;
       }
       case STRING: {
-        //create command_t
-        command_t words = (command_t) checked_malloc(sizeof(struct command));
-        words->type = SIMPLE_COMMAND;
-        char** dblptr = (char**)checked_malloc(sizeof(char*));
-        *dblptr = (char*)(token_iter->_string);
-        words->u.word = dblptr;
-        //needs rework
-        words->input = NULL;
-        words->output = NULL;
-        push(&operators, words);
+        //check of redirect operators are present in operator stack
+        if (peek(&operators)->type == SIMPLE_COMMAND) {
+          //create command_t from current stuff on stack
+          command_t words = peek(&operators);
+          pop(&operators);
+
+          //check if input or output and set params
+          if (words->input != NULL) {
+            words->input = *(peek(&commands)->u.word);
+          } else if (words->output != NULL) {
+            words->output = *(peek(&commands)->u.word);
+          }
+          words->u.command[0] = peek(&commands);
+          pop(&commands);
+
+          push(&operators, words);
+        } else {
+          //create command_t
+          command_t words = (command_t) checked_malloc(sizeof(struct command));
+          words->type = SIMPLE_COMMAND;
+          char** dblptr = (char**)checked_malloc(sizeof(char*));
+          *dblptr = (char*)(token_iter->_string);
+          words->u.word = dblptr;
+          //needs rework
+          words->input = NULL;
+          words->output = NULL;
+          push(&operators, words);
+        }
+
         break;
       }
       case SEMICOLON:
@@ -441,9 +460,21 @@ command_t make_command(token_container* list) {
         break;
       }
       case L_REDIR: {
+        command_t words = (command_t)checked_malloc(sizeof(struct command));
+        words->type = SIMPLE_COMMAND;
+        //needs rework
+        words->input = checked_malloc(sizeof(char));
+        words->input[0] = '\0';
+        push(&operators, words);
         break;
       }
       case R_REDIR: {
+        command_t words = (command_t)checked_malloc(sizeof(struct command));
+        words->type = SIMPLE_COMMAND;
+        //needs rework
+        words->output = checked_malloc(sizeof(char));
+        words->output = '\0';
+        push(&operators, words);
         break;
       }
       case NEWLINE: {
