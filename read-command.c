@@ -410,13 +410,13 @@ command_t make_command(token_container* list) {
         paran_list->_totaltokens = 0;
 
         //error checking needs to be implemented
-        token_iter = token_iter->next;
+        token_iter = token_iter->_next;
         while(token_iter != NULL)
         {
-          if (token_iter->_type = CLOSE_SUBSHELL) {
+          if (token_iter->_type == CLOSE_SUBSHELL) {
             break;
           } else {
-            add_token(paran_list, token_iter);
+            add_token(paran_list, *token_iter);
           }
         }
 
@@ -621,7 +621,7 @@ make_command_stream (int (*get_next_byte) (void *),
   //DEBUGGING PURPOSES
   printf("%s\n","NOW DOING REAL WORK");
   printf("%i\n",tokens->_totaltokens);
-  int i;
+  //int i;
   
   /*while (token_iter != NULL) {
     push(&operands,token_iter);
