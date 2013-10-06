@@ -130,12 +130,12 @@ void add_token (token_container* container, token new_token) {
 //Stack, used for building our commands
 typedef struct stack
 {
-    command_t* _command;
+    command_t _command;
     //struct stack* _next;
     struct stack* _prev;
 }* mystack;
 
-void push(mystack* stack, command_t* command)
+void push(mystack* stack, command_t command)
 {
   mystack temp = (mystack)checked_malloc(sizeof(struct stack));
   temp->_command = command;
