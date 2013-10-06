@@ -353,11 +353,13 @@ command_t make_command(token_container* list) {
 
     switch (token_iter->_type) {
       case NONE: {
+        printf("NONE: %s\n",token_iter->_string);
         break;
       }
       case STRING: {
+        printf("STRING: %s\n",token_iter->_string);
         //check of redirect operators are present in operator stack
-        if (peek(&operators)->type == SIMPLE_COMMAND) {
+        if (peek(&operators) != NULL && peek(&operators)->type == SIMPLE_COMMAND) {
           //create command_t from current stuff on stack
           command_t words = peek(&operators);
           pop(&operators);
@@ -373,6 +375,8 @@ command_t make_command(token_container* list) {
 
           push(&operators, words);
         } else {
+          printf("STRING ELSE: %s\n",token_iter->_string);
+
           //create command_t
           command_t words = (command_t) checked_malloc(sizeof(struct command));
           words->type = SIMPLE_COMMAND;
@@ -382,6 +386,7 @@ command_t make_command(token_container* list) {
           //needs rework
           words->input = NULL;
           words->output = NULL;
+
           push(&operators, words);
         }
 
@@ -391,6 +396,8 @@ command_t make_command(token_container* list) {
       case PIPE:
       case AND:
       case OR: {
+
+        printf("SEMI: %s\n",token_iter->_string);
         if (operators!=NULL && (peek(&operators)->type == PIPE_COMMAND || ((peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND) && token_iter->_type != PIPE))) {
           //create command_t from current stuff on stack
           command_t words = peek(&operators);
@@ -422,6 +429,8 @@ command_t make_command(token_container* list) {
         break;
       }
       case OPEN_SUBSHELL: {
+
+        printf("O SUB: %s\n",token_iter->_string);
 
         //create new list of inner token
         token_container* paran_list = checked_malloc(sizeof(token_container));
@@ -455,11 +464,15 @@ command_t make_command(token_container* list) {
         break;
       }
       case CLOSE_SUBSHELL: {
+
+        printf("CSUB: %s\n",token_iter->_string);
         //error because this should never happen
         printf("%s\n", "Extra close paranthesis");
         break;
       }
       case L_REDIR: {
+
+        printf("LRE: %s\n",token_iter->_string);
         command_t words = (command_t)checked_malloc(sizeof(struct command));
         words->type = SIMPLE_COMMAND;
         //needs rework
@@ -469,6 +482,8 @@ command_t make_command(token_container* list) {
         break;
       }
       case R_REDIR: {
+
+        printf("RRE: %s\n",token_iter->_string);
         command_t words = (command_t)checked_malloc(sizeof(struct command));
         words->type = SIMPLE_COMMAND;
         //needs rework
@@ -482,6 +497,8 @@ command_t make_command(token_container* list) {
         break;
       }
       default: {
+
+        printf("DEF: %s\n",token_iter->_string);
         command_t op = (command_t) checked_malloc(sizeof(struct command));
         if (token_iter->_type == AND) {
           op->type = AND_COMMAND;
@@ -646,6 +663,8 @@ make_command_stream (int (*get_next_byte) (void *),
 
   //tokenize the input
   token_container* tokens = tokenizer(buf);
+
+  make_command(tokens);
 
   
 
