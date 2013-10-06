@@ -375,10 +375,11 @@ command_t make_command(token_container* list) {
           } else if (words->output != NULL) {
             words->output = *(peek(&commands)->u.word);
           }
+          pop(&commands);
           words->u.command[0] = peek(&commands);
           pop(&commands);
 
-          push(&operators, words);
+          push(&commands, words);
         } else {
           printf("STRING ELSE: %s\n",token_iter->_string);
 
@@ -392,7 +393,7 @@ command_t make_command(token_container* list) {
           words->input = NULL;
           words->output = NULL;
 
-          push(&operators, words);
+          push(&commands, words);
         }
 
         break;
@@ -428,6 +429,7 @@ command_t make_command(token_container* list) {
           } else if (token_iter->_type == SEMICOLON) {
             op->type = SEQUENCE_COMMAND;
           }
+          printf("%s\n", "SEMI Pushing operator");
           push(&operators, op);
 
         }
@@ -524,7 +526,8 @@ command_t make_command(token_container* list) {
   }
 
   //iterate through list of operators and pop them
-  while(peek(&operators)) {
+  while(peek(&operators) != NULL) {
+    printf("%s\n", "process stack");
     command_t words = peek(&operators);
     pop(&operators);
     words->u.command[1] = peek(&commands);
@@ -532,7 +535,7 @@ command_t make_command(token_container* list) {
     words->u.command[0] = peek(&commands);
     pop(&commands);
     if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
-      printf("%s\n", "NULL operator");
+      printf("%s\n", "while peek NULL operator");
       return NULL;
     }
     push(&commands, words);
