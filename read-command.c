@@ -392,6 +392,9 @@ command_t make_command(token_container* list) {
           command_t words = peek(&operators);
           pop(&operators);
 
+          words->input = NULL;
+          words->output = NULL;
+
           printf("STRING OP WORD: %s\n",token_iter->_string);
 
           words->u.command[1] = peek(&commands);
