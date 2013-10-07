@@ -147,9 +147,9 @@ void pop(mystack* stack)
 {
   if(stack != NULL && (*stack) != NULL)
   {
-    mystack temp = *stack;
+    //mystack temp = *stack;
     *stack = (*stack)->_prev;
-    free(temp);
+    //free(temp);
   }
 }
 
@@ -400,8 +400,18 @@ command_t make_command(token_container* list) {
 
           words->u.command[1] = peek(&commands);
           pop(&commands);
-          words->u.command[0] = peek(&commands);
-          pop(&commands);
+
+          //create operators
+          command_t nwords = (command_t) checked_malloc(sizeof(struct command));
+          nwords->type = SIMPLE_COMMAND;
+          char** dblptr = (char**)checked_malloc(sizeof(char*));
+          *dblptr = (char*)(token_iter->_string);
+          nwords->u.word = dblptr;
+          //needs rework
+          nwords->input = NULL;
+          nwords->output = NULL;
+
+          words->u.command[0] = nwords;
           
           printf("STRING OP PUSH: %s\n",token_iter->_string);
           push(&commands, words);
@@ -493,7 +503,7 @@ command_t make_command(token_container* list) {
         printf("O SUB MAKE: %s\n",token_iter->_string);
 
         if (sub != NULL) {
-          command_t words = (command_t)checked_malloc(sizeof(command_t));
+          command_t words = (command_t)checked_malloc(sizeof(command));
           words->type = SUBSHELL_COMMAND;
           printf("O SUB PUSH: %s\n",token_iter->_string);
           words->u.subshell_command = sub;
