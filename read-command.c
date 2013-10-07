@@ -343,7 +343,7 @@ token_container* tokenizer(char* input) {
         //add character to the end of string
 
         int current_length = strlen(new_token._string);
-        new_token._string = checked_realloc(new_token._string, (current_length+1)*sizeof(token));
+        new_token._string = checked_realloc(new_token._string, current_length+1);
         new_token._string[current_length] = current_char;
         new_token._string[current_length+1] = '\0';
         break;
@@ -703,8 +703,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
 
   char current;
-  char* buf = checked_malloc(sizeof(char));
-  int len = 0;
+  char buf[1024] = "";
   char last_char = '\0'; //Keeps track of the last char read
   char last_non_space_char = '\0';
   int count = 0; //Total number of char's added
@@ -809,8 +808,6 @@ make_command_stream (int (*get_next_byte) (void *),
           line_begin = false;
         else
           line_begin = true;
-        len++;
-        buf = checked_realloc(buf,(2+len)*sizeof(char));
         append(buf,current); //Add character to our buffer
         last_char = current;
         if(current != ' ')
