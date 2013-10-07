@@ -290,7 +290,7 @@ token_container* tokenizer(char* input) {
         new_token._type = OPEN_SUBSHELL;
         break;
       }
-      case ')': { //subsheell end
+      case ')': { //subshell end
         if (new_token._type != NONE) { //if not new token
           add_token(container, new_token);
         }
