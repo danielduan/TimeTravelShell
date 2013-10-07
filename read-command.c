@@ -48,7 +48,7 @@ struct command_stream
 //Returns true if character is alph-numerical or one of ! % + , - . / : @ ^ _
 bool validChar (char c)
 {
-  if(isalnum(c))
+  if(isalnum(c) || isspace(c))
     return true;
   switch(c){
     case '!':
@@ -62,9 +62,22 @@ bool validChar (char c)
     case '@':
     case '^':
     case '_':
+    case ';':
+    case '|':
+    case '&':
+    case '<':
+    case '>':
+    case '(':
+    case ')':
+    case '\n':
+    case '\t':
+    case '#':
+    case '\r':
       return true;
+      break;
     default:
       return false;
+      break;
   }
 }
 
@@ -212,9 +225,8 @@ token_container* tokenizer(char* input) {
           add_token(container, new_token);
         }
         //save character
-        token_container* new_container = checked_malloc(sizeof(token_container));
-        container->_next_tokens = new_container;
-        container = new_container;
+        container->_next_tokens = checked_malloc(sizeof(token_container));
+        container = (token_container*)(container->_next_tokens);
         char* new_string = checked_malloc(2 * sizeof(char));
         new_string[0] = current_char;
         new_string[1] = '\0';
@@ -363,18 +375,18 @@ command_t make_command(token_container* list) {
 
   //loop through list of tokens to process
   while (token_iter != NULL) {
-    printf("pushing: %s\n",token_iter->_string);
+    //printf("pushing: %s\n",token_iter->_string);
 
     switch (token_iter->_type) {
       case NONE: {
-        printf("NONE: %s\n",token_iter->_string);
+        //printf("NONE: %s\n",token_iter->_string);
         break;
       }
       case STRING: {
-        printf("STRING: %s\n",token_iter->_string);
+        //printf("STRING: %s\n",token_iter->_string);
         //check of redirect operators are present in operator stack
         if (peek(&operators) != NULL && peek(&operators)->type == SIMPLE_COMMAND) {
-          printf("STRING OP: %s\n",token_iter->_string);
+          //printf("STRING OP: %s\n",token_iter->_string);
           //create command_t from current stuff on stack
           command_t words = peek(&operators);
           pop(&operators);
@@ -388,13 +400,47 @@ command_t make_command(token_container* list) {
             words->output = token_iter->_string;
           }
 
-          printf("STRING WORD: %s\n",token_iter->_string);
+          //printf("STRING WORD: %s\n",token_iter->_string);
           words->type = SIMPLE_COMMAND;
 
-          words->u.word = peek(&commands)->u.word;
+          //words->u.word = peek(&commands)->u.word;
+          command_t prev = peek(&commands);
+
+          if (prev->input != NULL) {
+            words->u.word = prev->u.word;
+            printf("STRING WORD 1: %s\n",token_iter->_string);
+            size_t origlen = strlen(prev->input);
+            char* catword = *(words->u.word);
+            printf("STRING WORD 2: %s\n",token_iter->_string);
+            catword = checked_realloc(catword, strlen(catword)+2+strlen(prev->input));
+            size_t x;
+
+            catword[origlen] = '<';
+            printf("STRING WORD 3: %s\n",token_iter->_string);
+            for (x = 0; x < strlen(prev->input); x++) {
+              printf("STRING WORD copy: %c\n",prev->input[x]);
+              catword[origlen + 1 + x] = prev->input[x];
+            }
+            printf("STRING WORD 4: %s\n",catword);
+          } else if (prev->output != NULL){
+            words->u.word = prev->u.word;
+            size_t origlen = strlen(prev->output);
+            char* catword = *(words->u.word);
+            catword = checked_realloc(catword, strlen(catword)+1+strlen(prev->output));
+            size_t x;
+            catword[origlen] = '>';
+            for (x = 0; x < strlen(prev->output) - 1; x++) {
+              catword[origlen + 1 + x] = prev->output[x];
+              printf("STRING WORD copy2: %c\n",prev->output[x]);
+            }
+            printf("STRING WORD 42: %s\n",catword);
+          }
+          else {
+            words->u.word = prev->u.word;
+          }
           pop(&commands);
           
-          printf("STRING PUSH: %s\n",token_iter->_string);
+          //printf("STRING PUSH: %s\n",token_iter->_string);
           push(&commands, words);
         } // check if && or || or | is present
         else if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND || peek(&operators)->type == PIPE_COMMAND)) {
@@ -405,7 +451,7 @@ command_t make_command(token_container* list) {
           words->input = NULL;
           words->output = NULL;
 
-          printf("STRING OP WORD: %s\n",token_iter->_string);
+          //printf("STRING OP WORD: %s\n",token_iter->_string);
 
           words->u.command[0] = peek(&commands);
           pop(&commands);
@@ -422,12 +468,12 @@ command_t make_command(token_container* list) {
 
           words->u.command[1] = nwords;
           
-          printf("STRING OP PUSH: %s\n",token_iter->_string);
+          //printf("STRING OP PUSH: %s\n",token_iter->_string);
           push(&commands, words);
         
         }
          else {
-          printf("STRING ELSE: %s\n",token_iter->_string);
+          //printf("STRING ELSE: %s\n",token_iter->_string);
 
           //create command_t
           command_t words = (command_t) checked_malloc(sizeof(struct command));
@@ -485,7 +531,7 @@ command_t make_command(token_container* list) {
       */
       case OPEN_SUBSHELL: {
 
-        printf("O SUB: %s\n",token_iter->_string);
+        //printf("O SUB: %s\n",token_iter->_string);
 
         //create new list of inner token
         token_container* paran_list = checked_malloc(sizeof(token_container));
@@ -509,32 +555,32 @@ command_t make_command(token_container* list) {
 
         //recursively call this function again
         command_t sub = make_command(paran_list);
-        printf("O SUB MAKE: %s\n",token_iter->_string);
+        //printf("O SUB MAKE: %s\n",token_iter->_string);
 
         if (sub != NULL) {
           command_t words = (command_t)checked_malloc(sizeof(struct command));
           words->type = SUBSHELL_COMMAND;
-          printf("O SUB PUSH: %s\n",token_iter->_string);
+          //printf("O SUB PUSH: %s\n",token_iter->_string);
           words->u.subshell_command = sub;
           push(&commands, words);
         }
 
         //move iterator to next token
-        printf("O SUB NEXT: %s\n",token_iter->_string);
+        //printf("O SUB NEXT: %s\n",token_iter->_string);
         token_iter = last;
-        printf("O SUB BREAK: %s\n",token_iter->_string);
+        //printf("O SUB BREAK: %s\n",token_iter->_string);
         break;
       }
       case CLOSE_SUBSHELL: {
 
-        printf("CSUB: %s\n",token_iter->_string);
+        //printf("CSUB: %s\n",token_iter->_string);
         //error because this should never happen
-        printf("%s\n", "Extra close paranthesis");
+        //printf("%s\n", "Extra close paranthesis");
         break;
       }
       case L_REDIR: {
 
-        printf("LRE: %s\n",token_iter->_string);
+        //printf("LRE: %s\n",token_iter->_string);
         command_t words = (command_t)checked_malloc(sizeof(struct command));
         words->type = SIMPLE_COMMAND;
         //needs rework
@@ -545,7 +591,7 @@ command_t make_command(token_container* list) {
       }
       case R_REDIR: {
 
-        printf("RRE: %s\n",token_iter->_string);
+        //printf("RRE: %s\n",token_iter->_string);
         command_t words = (command_t)checked_malloc(sizeof(struct command));
         words->type = SIMPLE_COMMAND;
         //needs rework
@@ -555,12 +601,12 @@ command_t make_command(token_container* list) {
         break;
       }
       case NEWLINE: {
-        printf("%s\n", "New line, should be end of command");
+        //printf("%s\n", "New line, should be end of command");
         break;
       }
       default: {
 
-        printf("DEF: %s\n",token_iter->_string);
+        //printf("DEF: %s\n",token_iter->_string);
         command_t op = (command_t) checked_malloc(sizeof(struct command));
         if (token_iter->_type == AND) {
           op->type = AND_COMMAND;
@@ -589,7 +635,7 @@ command_t make_command(token_container* list) {
     words->u.command[0] = peek(&commands);
     pop(&commands);
     if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
-      printf("%s\n", "operator stack is NULL");
+      //printf("%s\n", "operator stack is NULL");
       return NULL;
     }
     push(&commands, words);
@@ -597,14 +643,14 @@ command_t make_command(token_container* list) {
 
   command_t output = (command_t)checked_malloc(sizeof(struct command));
   output = peek(&commands);
-  printf("THE PUSHED COMMAND INPUT: %s\n", output->input);
+  //printf("THE PUSHED COMMAND INPUT: %s\n", output->input);
   pop(&commands);
   //if for whatever reason its empty, catch it.
   if (output != NULL) {
     return output;
   } else {
     //something wrong happened
-    printf("%s\n", "command stack empty");
+    //printf("%s\n", "command stack empty");
     return NULL;
   }
 
@@ -659,30 +705,70 @@ make_command_stream (int (*get_next_byte) (void *),
 
   char current;
   char buf[1024] = "";
-  char last_char; //Keeps track of the last char read
-  char last_non_space_char;
+  char last_char = '\0'; //Keeps track of the last char read
+  char last_non_space_char = '\0';
   int count = 0; //Total number of char's added
   int count_line = 0; //Counts total number of lines or "commands" that we have
   bool line_begin = true; //Signifies the beginning of a line, used to remove whitespaces
   bool comment = false; //Comment becomes true if we're currently inside a comment
-  //bool paran = false; //Checks if we're currently in a ( ) NEED TO IMPLEMENT
+  bool dble_AND = false; //Is true when we see a &&
+  bool dble_OR = false; //Is true when we see a ||
+  int paran_count = 0; //Number of parans we're in, and checks if we're currently in a paran
 
 
   //Loops through the entire input
   while((current = get_next_byte(get_next_byte_argument)) != EOF)
   {
+    if(!validChar(current))
+    {
+      error(1,0,"Not a valid character");
+    }
+    if(current == '(')
+      paran_count++;
+    if(current == ')')
+      paran_count--;
+
+    if((current == ' ' || current == '\n' || current == '\r') && (last_non_space_char == '\0'))
+        continue;
+    //if((current == '|' || current == '&' || current == '<' || current == '>' || current == ';') && last_char == '\0')
+    //    error(1,0,"Bad characters");
+    if(current == ';' && (last_non_space_char == '\n' || last_char == '\0'))
+      error(1,0,"Invalid ; error");
+    //Handles redirects
+    if((current == '<' && last_non_space_char == '<') ||(current == '>' && last_non_space_char == '>'))
+        error(1,0,"Can't redirect twice");
+    //Handles semicolons the same way we handle newlines
+    if(current == ';')
+      current = '\n';
+
+    //Checks if we have ||| or &&& in a row
+    if(dble_AND == true && current == '&')
+      error(1,0,"Can't have &&&");
+    if(dble_OR == true && current == '|')
+      error(1,0,"Can't have |||");
+
+    //Sets dble to be true if we see a && or ||
+    if(current == '&' && last_char == '&' && dble_AND == false)
+      dble_AND = true;
+    else
+      dble_AND = false;
+
+    if(current == '|' && last_char == '|' && dble_OR == false)
+      dble_OR = true;
+    else
+      dble_OR = false;
 
     //Next two if statements will get rid of any spaces that occur between a '<' or '>'
-    if((current == '>' || current == '<') && last_char == ' ')
+    if((current == '>' || current == '<' || current == '|' || current == '&') && last_char == ' ')
       remove_last_char(buf);
-    if(current == ' ' && (last_char == '>' || last_char == '<'))
+
+    if(current == ' ' && (last_char == '>' || last_char == '<'|| last_char == '|'|| last_char == '&'))
       continue;
 
     //If there is a comment right after a token, there is an error
     if(current == '#' && (last_non_space_char == '|' || last_non_space_char == '&' || last_non_space_char == '<' || last_non_space_char == '>'))
     {
       error(1,0,"Invalid syntax: Comment right after a token");
-      exit(1);
     }
 
     //Get rid of spaces
@@ -695,16 +781,19 @@ make_command_stream (int (*get_next_byte) (void *),
     if(current == '#')
       comment = true;
     if(current == '\n' && comment == true)
-      comment = false;
+      {comment = false;
+        continue;}
 
     //If we run into a newline, then we need to check if the previous character is a special character
     //If it is, then we need to continue adding to the buffer
-    if(current == '\n' && (last_non_space_char == '|' || last_non_space_char == '&' || last_non_space_char == '<' || last_non_space_char == '>'))
+    if(current == '\n' && (last_non_space_char == '|' || last_non_space_char == '&' ))
     { 
       count_line++;
       line_begin = true;
       continue;
     }
+    if(current == '\n' && ( last_non_space_char == '<' || last_non_space_char == '>'))
+      error(1,0,"Redirection syntax error");
 
     //Gets rid of uneeded newlines
     if(current == '\n' && last_char == '\n')
@@ -714,9 +803,12 @@ make_command_stream (int (*get_next_byte) (void *),
     }
 
     //We add the current character to our buffer as long as we're not in a comment
-    else if(comment == false)
+    if(comment == false)
       {
-        line_begin = false;
+        if(current != '\n')
+          line_begin = false;
+        else
+          line_begin = true;
         append(buf,current); //Add character to our buffer
         last_char = current;
         if(current != ' ')
@@ -724,6 +816,15 @@ make_command_stream (int (*get_next_byte) (void *),
         count++;
       }
   }
+
+  if(last_char == '>' || last_char == '|' || last_char == '&' || last_char == '<' || last_char == '(')
+    error(1,0,"Invalid syntax");
+  if(last_char == ')' && paran_count != 0)
+    error(1,0,"Mismatched semicolons");
+  if(last_char == '\n')
+    remove_last_char(buf);
+  if(paran_count != 0)
+      error(1,0,"Mismatched semicolons");
 
   //tokenize the input
   token_container* tokens = tokenizer(buf);
@@ -770,10 +871,10 @@ make_command_stream (int (*get_next_byte) (void *),
   command_list->commands = checked_malloc(sizeof(struct command));
 
   while(tokens != NULL){
-    printf("%s\n","NOT NULL");
+    //printf("%s\n","NOT NULL");
     command_list->_size++;
     command_list->commands[command_list->_size] = make_command(tokens);
-    tokens = tokens->_next_tokens;
+    tokens = (token_container*)tokens->_next_tokens;
   }
   //printf("THE INPUT IS: %s\n", command_list->commands[command_list->_size]->input);
   //printf("THE OUTPUT IS: %s\n", command_list->commands[command_list->_size]->output);
