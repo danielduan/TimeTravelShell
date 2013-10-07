@@ -1,1 +1,11 @@
-cat || a 
+cat<a
+
+true
+
+false
+
+fuck
+
+this
+
+lab

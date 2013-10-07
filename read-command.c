@@ -98,6 +98,7 @@ typedef struct node token;
 typedef struct {
   token* _token;
   token* _last_token;
+  struct token_container* _next_tokens;
   size_t _totaltokens;
 } token_container;
 
@@ -149,7 +150,7 @@ void pop(mystack* stack)
   {
     mystack temp = *stack;
     *stack = (*stack)->_prev;
-    free(temp);
+    //free(temp);
   }
 }
 
@@ -168,8 +169,12 @@ token_container* tokenizer(char* input) {
   // intialize return token container
   token_container* container = checked_malloc(sizeof(token_container));
   container->_token = NULL;
-  //container->_length = 0;
+  container->_next_tokens = NULL;
   container->_totaltokens = 0;
+
+  //Initialize a token head, which we will return
+  token_container* head = checked_malloc(sizeof(token_container));
+  head = container;
 
   // create new token
   token new_token;
@@ -187,7 +192,7 @@ token_container* tokenizer(char* input) {
         //these should be removed already
         break;
       }
-      case ';': { //end of command string
+      /*case ';': { //end of command string
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
@@ -199,13 +204,17 @@ token_container* tokenizer(char* input) {
         new_token._string = new_string;
         new_token._type = SEMICOLON;
         break;
-      }
-      case '\n': { //should end of token
+      }*/
+      case '\n': 
+      case ';': { //should end of token
         //if type is none, append current 
         if (new_token._type != NONE) {
           add_token(container, new_token);
         }
         //save character
+        token_container* new_container = checked_malloc(sizeof(token_container));
+        container->_next_tokens = new_container;
+        container = new_container;
         char* new_string = checked_malloc(2 * sizeof(char));
         new_string[0] = current_char;
         new_string[1] = '\0';
@@ -335,7 +344,7 @@ token_container* tokenizer(char* input) {
     add_token(container, new_token);
   }
   //return container after everything is processed
-  return container;
+  return head;
 }
 
 //use this function to convert list of tokens into command_t
@@ -576,7 +585,7 @@ command_t make_command(token_container* list) {
     push(&commands, words);
   }
 
-  command_t output =(command_t)checked_malloc(sizeof(struct command));
+  command_t output = (command_t)checked_malloc(sizeof(struct command));
   output = peek(&commands);
   printf("THE PUSHED COMMAND INPUT: %s\n", output->input);
   pop(&commands);
@@ -745,10 +754,17 @@ make_command_stream (int (*get_next_byte) (void *),
   command_list->commands[command_list->_size] = stack_to_stream(&operands,&operators);*/
 
   command_stream_t command_list = checked_malloc(sizeof(struct command_stream));
-  command_list->_size = 0;
+  command_list->_size = -1;
+  command_list->_iterator = 0;
   command_list->_next = NULL;
   command_list->commands = checked_malloc(sizeof(struct command));
-  command_list->commands[command_list->_size] = make_command(tokens);
+
+  while(tokens != NULL){
+    printf("%s\n","NOT NULL");
+    command_list->_size++;
+    command_list->commands[command_list->_size] = make_command(tokens);
+    tokens = tokens->_next_tokens;
+  }
   //printf("THE INPUT IS: %s\n", command_list->commands[command_list->_size]->input);
   //printf("THE OUTPUT IS: %s\n", command_list->commands[command_list->_size]->output);
   return command_list;
@@ -759,7 +775,7 @@ read_command_stream (command_stream_t s)
 {
   /* FIXME: Replace this with your implementation too.  */
   //error (1, 0, "command reading not yet implemented");
-    if(s->_size < 0)
+    if(s->_iterator > s->_size)
     return NULL;
-  return s->commands[s->_size--];
+  return s->commands[(s->_iterator++)];
 }
