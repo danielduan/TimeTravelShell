@@ -405,7 +405,11 @@ command_t make_command(token_container* list) {
 
           //words->u.word = peek(&commands)->u.word;
           command_t prev = peek(&commands);
+<<<<<<< HEAD
 
+=======
+          
+>>>>>>> 049ec942fbe0460472f20e15a1cf7ff8f649318d
           if (prev->input != NULL) {
             words->u.word = prev->u.word;
             printf("STRING WORD 1: %s\n",token_iter->_string);
@@ -761,8 +765,12 @@ make_command_stream (int (*get_next_byte) (void *),
     //Next two if statements will get rid of any spaces that occur between a '<' or '>'
     if((current == '>' || current == '<' || current == '|' || current == '&') && last_char == ' ')
       remove_last_char(buf);
+<<<<<<< HEAD
 
     if(current == ' ' && (last_char == '>' || last_char == '<'|| last_char == '|'|| last_char == '&'))
+=======
+    if(current == ' ' && (last_char == '>' || last_char == '<' || last_char == '|' || last_char == '&'))
+>>>>>>> 049ec942fbe0460472f20e15a1cf7ff8f649318d
       continue;
 
     //If there is a comment right after a token, there is an error
