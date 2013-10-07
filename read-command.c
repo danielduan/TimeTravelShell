@@ -393,6 +393,7 @@ command_t make_command(token_container* list) {
 
           //words->u.word = peek(&commands)->u.word;
           command_t prev = peek(&commands);
+          
           if (prev->input != NULL) {
             words->u.word = prev->u.word;
             printf("STRING WORD 1: %s\n",token_iter->_string);
