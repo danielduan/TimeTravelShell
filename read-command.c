@@ -399,6 +399,7 @@ command_t make_command(token_container* list) {
           //check if theres redir out
           if (token_iter->_next != NULL && token_iter->_next->_type == R_REDIR && words->input != NULL) {
           	words->u.word = peek(&commands)->u.word;
+            //pop(&commands);
             //printf("STRING WORD 1: %s\n",token_iter->_string);
             size_t origlen = strlen(token_iter->_string);
             char* catword = *(words->u.word);
@@ -479,7 +480,7 @@ command_t make_command(token_container* list) {
           //printf("STRING PUSH: %s\n",token_iter->_string);
           push(&commands, words);
         } // check if && or || or | is present
-        else if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND || peek(&operators)->type == PIPE_COMMAND)) {
+        else if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND || peek(&operators)->type == PIPE_COMMAND) && !(token_iter->_next != NULL && token_iter->_next->_type == L_REDIR) && !(token_iter->_next != NULL && token_iter->_next->_type == R_REDIR)) {
           command_t words = peek(&operators);
           words->u.word = NULL;
           pop(&operators);
