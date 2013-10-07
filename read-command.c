@@ -398,7 +398,7 @@ command_t make_command(token_container* list) {
 
           printf("STRING OP WORD: %s\n",token_iter->_string);
 
-          words->u.command[1] = peek(&commands);
+          words->u.command[0] = peek(&commands);
           pop(&commands);
 
           //create operators
@@ -411,7 +411,7 @@ command_t make_command(token_container* list) {
           nwords->input = NULL;
           nwords->output = NULL;
 
-          words->u.command[0] = nwords;
+          words->u.command[1] = nwords;
           
           printf("STRING OP PUSH: %s\n",token_iter->_string);
           push(&commands, words);
@@ -503,7 +503,7 @@ command_t make_command(token_container* list) {
         printf("O SUB MAKE: %s\n",token_iter->_string);
 
         if (sub != NULL) {
-          command_t words = (command_t)checked_malloc(sizeof(command));
+          command_t words = (command_t)checked_malloc(sizeof(struct command));
           words->type = SUBSHELL_COMMAND;
           printf("O SUB PUSH: %s\n",token_iter->_string);
           words->u.subshell_command = sub;
