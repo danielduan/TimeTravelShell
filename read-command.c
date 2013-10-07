@@ -405,27 +405,22 @@ command_t make_command(token_container* list) {
 
           //words->u.word = peek(&commands)->u.word;
           command_t prev = peek(&commands);
-<<<<<<< HEAD
-
-=======
-          
->>>>>>> 049ec942fbe0460472f20e15a1cf7ff8f649318d
           if (prev->input != NULL) {
             words->u.word = prev->u.word;
-            printf("STRING WORD 1: %s\n",token_iter->_string);
+            //printf("STRING WORD 1: %s\n",token_iter->_string);
             size_t origlen = strlen(prev->input);
             char* catword = *(words->u.word);
-            printf("STRING WORD 2: %s\n",token_iter->_string);
+            //printf("STRING WORD 2: %s\n",token_iter->_string);
             catword = checked_realloc(catword, strlen(catword)+2+strlen(prev->input));
             size_t x;
 
             catword[origlen] = '<';
-            printf("STRING WORD 3: %s\n",token_iter->_string);
+            //printf("STRING WORD 3: %s\n",token_iter->_string);
             for (x = 0; x < strlen(prev->input); x++) {
-              printf("STRING WORD copy: %c\n",prev->input[x]);
+              //printf("STRING WORD copy: %c\n",prev->input[x]);
               catword[origlen + 1 + x] = prev->input[x];
             }
-            printf("STRING WORD 4: %s\n",catword);
+            //printf("STRING WORD 4: %s\n",catword);
           } else if (prev->output != NULL){
             words->u.word = prev->u.word;
             size_t origlen = strlen(prev->output);
@@ -435,9 +430,9 @@ command_t make_command(token_container* list) {
             catword[origlen] = '>';
             for (x = 0; x < strlen(prev->output) - 1; x++) {
               catword[origlen + 1 + x] = prev->output[x];
-              printf("STRING WORD copy2: %c\n",prev->output[x]);
+              //printf("STRING WORD copy2: %c\n",prev->output[x]);
             }
-            printf("STRING WORD 42: %s\n",catword);
+            //printf("STRING WORD 42: %s\n",catword);
           }
           else {
             words->u.word = prev->u.word;
@@ -765,12 +760,8 @@ make_command_stream (int (*get_next_byte) (void *),
     //Next two if statements will get rid of any spaces that occur between a '<' or '>'
     if((current == '>' || current == '<' || current == '|' || current == '&') && last_char == ' ')
       remove_last_char(buf);
-<<<<<<< HEAD
 
     if(current == ' ' && (last_char == '>' || last_char == '<'|| last_char == '|'|| last_char == '&'))
-=======
-    if(current == ' ' && (last_char == '>' || last_char == '<' || last_char == '|' || last_char == '&'))
->>>>>>> 049ec942fbe0460472f20e15a1cf7ff8f649318d
       continue;
 
     //If there is a comment right after a token, there is an error
