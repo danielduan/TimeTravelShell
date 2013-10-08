@@ -391,19 +391,55 @@ command_t make_command(token_container* list) {
           command_t words = peek(&operators);
           pop(&operators);
 
-          //check if input or output and set params
-          if (words->input != NULL) {
-            words->input = token_iter->_string;
-          } 
-
-          if (words->output != NULL) {
-            words->output = token_iter->_string;
-          }
+          
 
           //printf("STRING WORD: %s\n",token_iter->_string);
           words->type = SIMPLE_COMMAND;
 
+          //check if theres redir out
+          if (token_iter->_next != NULL && token_iter->_next->_type == R_REDIR && words->input != NULL) {
+          	words->u.word = peek(&commands)->u.word;
+            //pop(&commands);
+            //printf("STRING WORD 1: %s\n",token_iter->_string);
+            size_t origlen = strlen(token_iter->_string);
+            char* catword = *(words->u.word);
+            //printf("STRING WORD 2: %s\n",token_iter->_string);
+
+            if (token_iter->_next->_next == NULL || token_iter->_next->_next->_type != STRING) {
+              //throw error
+              exit(1);
+            }
+
+            catword = checked_realloc(catword, strlen(catword)+1+strlen(token_iter->_string)+1);
+            size_t x;
+            
+            catword[origlen] = '<';
+            //printf("STRING WORD 3: %s\n",token_iter->_string);
+            //copy b in a<b>c to string
+            for (x = 0; x < origlen; x++) {
+              //printf("STRING WORD copy: %c\n",prev->input[x]);
+              catword[origlen + 1 + x] = token_iter->_string[x];
+            }
+
+            words->output = token_iter->_next->_next->_string;
+            words->input = NULL;
+            token_iter = token_iter->_next->_next;
+            //printf("STRING WORD 4: %s\n",catword);
+          } else { //no redir out
+          	//check if input or output and set params
+  		      if (words->input != NULL) {
+  		        words->input = token_iter->_string;
+  		      } 
+
+  		      if (words->output != NULL) {
+  		        words->output = token_iter->_string;
+  		      }
+
+          	words->u.word = peek(&commands)->u.word;
+          }
+
           //words->u.word = peek(&commands)->u.word;
+          /*
           command_t prev = peek(&commands);
           if (prev->input != NULL) {
             words->u.word = prev->u.word;
@@ -433,16 +469,18 @@ command_t make_command(token_container* list) {
               //printf("STRING WORD copy2: %c\n",prev->output[x]);
             }
             //printf("STRING WORD 42: %s\n",catword);
+
           }
           else {
             words->u.word = prev->u.word;
           }
+          */
           pop(&commands);
           
           //printf("STRING PUSH: %s\n",token_iter->_string);
           push(&commands, words);
         } // check if && or || or | is present
-        else if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND || peek(&operators)->type == PIPE_COMMAND)) {
+        else if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND || peek(&operators)->type == PIPE_COMMAND) && !(token_iter->_next != NULL && token_iter->_next->_type == L_REDIR) && !(token_iter->_next != NULL && token_iter->_next->_type == R_REDIR)) {
           command_t words = peek(&operators);
           words->u.word = NULL;
           pop(&operators);
@@ -609,14 +647,35 @@ command_t make_command(token_container* list) {
         command_t op = (command_t) checked_malloc(sizeof(struct command));
         if (token_iter->_type == AND) {
           op->type = AND_COMMAND;
+          push(&operators, op);
         } else if (token_iter->_type == OR) {
           op->type = OR_COMMAND;
+          push(&operators, op);
         } else if (token_iter->_type == PIPE) {
           op->type = PIPE_COMMAND;
+          if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND)) {
+            //command_t x = peek(&operators);
+            //pop(&operators);
+            command_t words = peek(&operators);
+            pop(&operators);
+            words->u.command[1] = peek(&commands);
+            pop(&commands);
+            words->u.command[0] = peek(&commands);
+            pop(&commands);
+            if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
+              //printf("%s\n", "operator stack is NULL");
+              return NULL;
+            }
+            push(&commands, words);
+            push(&operators, op);
+            //push(&operators, x);
+          } else {
+            push(&operators,op);
+          }
         } else if (token_iter->_type == SEMICOLON) {
           op->type = SEQUENCE_COMMAND;
+          push(&operators, op);
         }
-        push(&operators, op);
         break;
       }
     }
