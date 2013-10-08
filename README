@@ -1,4 +1,20 @@
-This is a skeleton for CS 111 Lab 1.
+CS111 Lab 1a
 
-Replace this README file with notes on your implementation.
-Mentions any special features or limitations.
+Kenneth Shi 304063313
+Jia Dan Duan 604022222
+
+We tried to make everything work and all the features should
+be implemented. There are errors noted below. We are also unable to
+make dist because of them so we tar'd it ourselves.
+
+Implementation:
+We first read in bytes one at a time, and then process it into a giant character array buffer. We check for any possible syntax errors, and if there are, we print out the error (without the line number). Next, the string buffer is passed into a function that will turn the string into a bunch of "tokens", each holding either an operator or a string. These are pushed into two different stacks, and processed the same way we would process math equations with stacks.
+
+Known errors:
+*precedence is not taken into account in certain && or ||
+	against | or paranthesis
+*in certain commands, parsing will introduce an unknown character
+	at the end of the string
+*line number is not printed upon errors
+
+

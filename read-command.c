@@ -647,14 +647,35 @@ command_t make_command(token_container* list) {
         command_t op = (command_t) checked_malloc(sizeof(struct command));
         if (token_iter->_type == AND) {
           op->type = AND_COMMAND;
+          push(&operators, op);
         } else if (token_iter->_type == OR) {
           op->type = OR_COMMAND;
+          push(&operators, op);
         } else if (token_iter->_type == PIPE) {
           op->type = PIPE_COMMAND;
+          if (peek(&operators) != NULL && (peek(&operators)->type == AND_COMMAND || peek(&operators)->type == OR_COMMAND)) {
+            //command_t x = peek(&operators);
+            //pop(&operators);
+            command_t words = peek(&operators);
+            pop(&operators);
+            words->u.command[1] = peek(&commands);
+            pop(&commands);
+            words->u.command[0] = peek(&commands);
+            pop(&commands);
+            if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
+              //printf("%s\n", "operator stack is NULL");
+              return NULL;
+            }
+            push(&commands, words);
+            push(&operators, op);
+            //push(&operators, x);
+          } else {
+            push(&operators,op);
+          }
         } else if (token_iter->_type == SEMICOLON) {
           op->type = SEQUENCE_COMMAND;
+          push(&operators, op);
         }
-        push(&operators, op);
         break;
       }
     }
