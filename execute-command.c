@@ -48,8 +48,8 @@ execute_command (command_t c, bool time_travel)
 
      int fd[2]; // Used for PIPE
 
-     //printf("%s\n","THE STATUS IS");
-     //printf("%i\n", c->status);
+     //printf("%s\n","THE TYPE IS");
+     //printf("%i\n", c->type);
      switch(c->type){
      	case SIMPLE_COMMAND:{
      		int status;
@@ -138,7 +138,7 @@ execute_command (command_t c, bool time_travel)
 	    	command_t right = c->u.command[1];
 	    	pipe(fd);
 	    	pid_t pid_PIPE = fork();
-	    	if(pid_PIPE ==0){
+	    	if(pid_PIPE == 0){
 	    		close(fd[0]);
 		    	dup2(fd[1],1);
 		    	execute_command(left,time_travel);
@@ -151,9 +151,11 @@ execute_command (command_t c, bool time_travel)
 		    }
 		    break;
 	    }
-	    case SEQUENCE_COMMAND:
-	    	printf("%s\n","SEQUENCE COMMAND");
+	    case SUBSHELL_COMMAND:{
+	    	execute_command(c->u.subshell_command,time_travel);
+	    	c->status = c->u.subshell_command->status;
 	    	break;
+	    }
      	default:
      	printf("%s\n","NOT IMPLEMENTED");
      	return;
