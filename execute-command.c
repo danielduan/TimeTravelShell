@@ -161,6 +161,13 @@ execute_command (command_t c, bool time_travel)
 	    	c->status = c->u.subshell_command->status;
 	    	break;
 	    }
+	    case SEQUENCE_COMMAND:{
+	    	command_t left = c->u.command[0];
+     		command_t right = c->u.command[1];
+	    	execute_command(left,time_travel);
+	    	execute_command(right,time_travel);
+	    	break;
+	    }
      	default:
      	printf("%s\n","NOT IMPLEMENTED");
      	return;
