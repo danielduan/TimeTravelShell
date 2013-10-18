@@ -1,7 +1,22 @@
-CS111 Lab 1a
+CS111 Lab 1b
 
 Kenneth Shi 304063313
 Jia Dan Duan 604022222
+
+Lab 1b Submission:
+Implemented lab 1b, and everything seems to be working. However, our 1A is still not completely fixed, so the same issues are around and may cause problems when running 1b. 
+
+The currently implemented commands:
+-Simple
+-AND
+-OR
+-Sequence (although our 1A doesn't process sequences correctly so we're unable to test accuracy)
+-Subshell
+-Pipe
+
+The outputs for our tests seem to match the same terminal outputs we we're assuming everything is implemented correctly.
+
+Lab 1a Submission:
 
 We tried to make everything work and all the features should
 be implemented. There are errors noted below. We are also unable to

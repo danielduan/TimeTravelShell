@@ -50,8 +50,6 @@ execute_command (command_t c, bool time_travel)
      int stdin_copy = dup(0);
 	 int stdout_copy = dup(1);
 
-     //printf("%s\n","THE TYPE IS");
-     //printf("%i\n", c->type);
      switch(c->type){
      	case SIMPLE_COMMAND:{
      		int status;
@@ -85,12 +83,14 @@ execute_command (command_t c, bool time_travel)
      		command_t left = c->u.command[0];
      		command_t right = c->u.command[1];
      		//pid_t pid_AND = fork();
+     		//Execute the left side
      		execute_command(left,time_travel);
      			//if (left -> type == SIMPLE_COMMAND) {
 				//	waitpid(pid_AND, &status, 0);
 				//	left -> status = WEXITSTATUS(status);
 				//}
 			c->status = left->status;
+			//If left side exits with 0, then we execute right side
 			if(left->status == 0){
 				execute_command(right,time_travel);
 				///if (right -> type == SIMPLE_COMMAND) {
@@ -99,31 +99,9 @@ execute_command (command_t c, bool time_travel)
 				}
 			c->status = right->status;
 			break;
-			//}
-     		/*
-     		if(pid_AND == 0){
-     			execute_command(left,time_travel);
-     			exit(0);
-     		}
-     		else{
-     			status = 0;
-     			if(wait(&status)==NULL)
-     				break;
-     			else{
-     			if(left->status != 0)
-     				break;
-     			else
-     				execute_command(right,time_travel);
-     			}
-     		}*/
-			/////
-
-     		//execute_command(left,time_travel);
-     		//if(command_status(left) == 0)
-     		//	execute_command(right,time_travel);
-     		//printf("%s\n","DONE WITH AND");
      	}
 	    case OR_COMMAND:{     		
+	    	//Works same as AND, except we only execute the right side if left side exits false
 	    	command_t left = c->u.command[0];
      		command_t right = c->u.command[1];
      		execute_command(left,time_travel);
@@ -169,7 +147,8 @@ execute_command (command_t c, bool time_travel)
 	    	break;
 	    }
      	default:
-     	printf("%s\n","NOT IMPLEMENTED");
+     	//Error, should never get to default case
+     	error(1,0,"Error with executing command");
      	return;
      }
 
