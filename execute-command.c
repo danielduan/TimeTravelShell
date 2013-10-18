@@ -47,6 +47,8 @@ execute_command (command_t c, bool time_travel)
      You can also use external functions defined in the GNU C Library.  */
 
      int fd[2]; // Used for PIPE
+     int stdin_copy = dup(0);
+	 int stdout_copy = dup(1);
 
      //printf("%s\n","THE TYPE IS");
      //printf("%i\n", c->type);
@@ -65,7 +67,7 @@ execute_command (command_t c, bool time_travel)
 				dup2(fd[0],0);
 			}
 			if(c->output){
-				fd[1] = open(c->output,O_WRONLY |  O_TRUNC| O_CREAT, 0666);
+				fd[1] = open(c->output,O_WRONLY | O_TRUNC| O_CREAT, 0666);
 				if(fd[1]<0)
 					exit(1);
 				dup2(fd[1],1);
@@ -76,7 +78,6 @@ execute_command (command_t c, bool time_travel)
 			}
 			else{
 				waitpid(pid,&status,0);
-				c->status = WEXITSTATUS(status);
 			}
 			break;
      	}
@@ -136,18 +137,22 @@ execute_command (command_t c, bool time_travel)
 	    case PIPE_COMMAND:{
 	    	command_t left = c->u.command[0];
 	    	command_t right = c->u.command[1];
+	    	int status;
 	    	pipe(fd);
 	    	pid_t pid_PIPE = fork();
 	    	if(pid_PIPE == 0){
 	    		close(fd[0]);
 		    	dup2(fd[1],1);
+		    	close(fd[1]);
 		    	execute_command(left,time_travel);
 		    }
 		    else{
 		    	close(fd[1]);
 		    	dup2(fd[0],0);
+		    	close(fd[0]);
 		    	execute_command(right,time_travel);
-		    	c->status = right->status;
+		    	waitpid(pid_PIPE,&status,0);
+		    	c->status = WEXITSTATUS(status);
 		    }
 		    break;
 	    }
@@ -160,5 +165,11 @@ execute_command (command_t c, bool time_travel)
      	printf("%s\n","NOT IMPLEMENTED");
      	return;
      }
+
+     //Clear the file I/O for the next command
+     dup2(stdin_copy, 0);
+	 dup2(stdout_copy, 1);
+	 close(stdin_copy);
+	 close(stdout_copy);
 
 }
