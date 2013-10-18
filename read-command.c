@@ -484,11 +484,20 @@ command_t make_command(token_container* list) {
           command_t words = peek(&operators);
           words->u.word = NULL;
           pop(&operators);
-
+          //printf("%s %i %s\n", "and or pipe", words->type, token_iter->_string);
           words->input = NULL;
           words->output = NULL;
 
           //printf("STRING OP WORD: %s\n",token_iter->_string);
+          // if pipe, check for previous command on stack
+          if (words->type == PIPE_COMMAND) {
+            //check if command stack has AND or OR previously
+            if (peek(&commands)->type == AND_COMMAND || peek(&commands)->type == OR_COMMAND) {
+              //needs to be reordered
+              //printf("%s %i %i\n", "pipe, needs reordering", words->type, peek(&commands)->type);
+            }
+
+          }
 
           words->u.command[0] = peek(&commands);
           pop(&commands);
@@ -679,9 +688,10 @@ command_t make_command(token_container* list) {
         break;
       }
     }
-
+    token* del = token_iter;
     //go to next token
     token_iter = token_iter->_next;
+    free(del);
   }
 
   //iterate through list of operators and pop them
@@ -703,6 +713,8 @@ command_t make_command(token_container* list) {
   output = peek(&commands);
   //printf("THE PUSHED COMMAND INPUT: %s\n", output->input);
   pop(&commands);
+  free(commands);
+  free(operators);
   //if for whatever reason its empty, catch it.
   if (output != NULL) {
     return output;
@@ -889,6 +901,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
   //tokenize the input
   token_container* tokens = tokenizer(buf);
+  free(buf);
 
   //DEBUGGING PURPOSES
   //printf("%s\n","NOW DOING REAL WORK");
@@ -935,7 +948,9 @@ make_command_stream (int (*get_next_byte) (void *),
     //printf("%s\n","NOT NULL");
     command_list->_size++;
     command_list->commands[command_list->_size] = make_command(tokens);
+    token_container* del = tokens;
     tokens = (token_container*)tokens->_next_tokens;
+    free(del);
   }
   //printf("THE INPUT IS: %s\n", command_list->commands[command_list->_size]->input);
   //printf("THE OUTPUT IS: %s\n", command_list->commands[command_list->_size]->output);
