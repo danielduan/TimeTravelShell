@@ -400,7 +400,7 @@ command_t make_command(token_container* list) {
           if (token_iter->_next != NULL && token_iter->_next->_type == R_REDIR && words->input != NULL) {
           	words->u.word = peek(&commands)->u.word;
             //pop(&commands);
-            //printf("STRING WORD 1: %s\n",token_iter->_string);
+            printf("STRING WORD 1: %s\n",token_iter->_string);
             size_t origlen = strlen(token_iter->_string);
             char* catword = *(words->u.word);
             //printf("STRING WORD 2: %s\n",token_iter->_string);
@@ -427,6 +427,7 @@ command_t make_command(token_container* list) {
             //printf("STRING WORD 4: %s\n",catword);
           } else { //no redir out
           	//check if input or output and set params
+            printf("STRING WORD ELSE: %s\n",token_iter->_string);
   		      if (words->input != NULL) {
   		        words->input = token_iter->_string;
   		      } 
@@ -717,6 +718,9 @@ command_t make_command(token_container* list) {
 
   //iterate through list of operators and pop them
   while(peek(&operators) != NULL) {
+    //*******************************************
+    //need to do swapping for precedence here too
+    //*******************************************
     command_t words = peek(&operators);
     pop(&operators);
     words->u.command[1] = peek(&commands);
