@@ -59,13 +59,13 @@ execute_command (command_t c, bool time_travel)
 				exit(1);
 			//Handle I/O redirect
 			if(c->input){
-				fd[0] = open(c->input,O_RDONLY | O_CREAT, 0666);
+				fd[0] = open(c->input,O_RDONLY | O_CREAT, 0644);
 				if(fd[0]<0)
 					exit(1);
 				dup2(fd[0],0);
 			}
 			if(c->output){
-				fd[1] = open(c->output,O_WRONLY | O_TRUNC| O_CREAT, 0666);
+				fd[1] = open(c->output,O_WRONLY | O_TRUNC| O_CREAT, 0644);
 				if(fd[1]<0)
 					exit(1);
 				dup2(fd[1],1);
@@ -130,14 +130,14 @@ execute_command (command_t c, bool time_travel)
 	    case SUBSHELL_COMMAND:{
 			//Handle I/O redirect
 			if(c->input){
-				fd[0] = open(c->input,O_RDONLY | O_CREAT, 0666);
+				fd[0] = open(c->input,O_RDONLY | O_CREAT, 0644);
 				if(fd[0]<0)
 					exit(1);
 				dup2(fd[0],0);
 				close(fd[0]);
 			}
 			if(c->output){
-				fd[1] = open(c->output,O_WRONLY | O_TRUNC| O_CREAT, 0666);
+				fd[1] = open(c->output,O_WRONLY | O_TRUNC| O_CREAT, 064);
 				if(fd[1]<0)
 					exit(1);
 				dup2(fd[1],1);
