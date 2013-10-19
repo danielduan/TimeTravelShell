@@ -128,6 +128,21 @@ execute_command (command_t c, bool time_travel)
 		    break;
 	    }
 	    case SUBSHELL_COMMAND:{
+			//Handle I/O redirect
+			if(c->input){
+				fd[0] = open(c->input,O_RDONLY | O_CREAT, 0666);
+				if(fd[0]<0)
+					exit(1);
+				dup2(fd[0],0);
+				close(fd[0]);
+			}
+			if(c->output){
+				fd[1] = open(c->output,O_WRONLY | O_TRUNC| O_CREAT, 0666);
+				if(fd[1]<0)
+					exit(1);
+				dup2(fd[1],1);
+				close(fd[0]);
+			}
 	    	execute_command(c->u.subshell_command,time_travel);
 	    	c->status = c->u.subshell_command->status;
 	    	break;
