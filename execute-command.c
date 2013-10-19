@@ -123,7 +123,7 @@ execute_command (command_t c, bool time_travel)
 		    	close(fd[0]);
 		    	execute_command(right,time_travel);
 		    	waitpid(pid_PIPE,&status,0);
-		    	c->status = WEXITSTATUS(status);
+		    	c->status = status;
 		    }
 		    break;
 	    }
