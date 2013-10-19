@@ -83,22 +83,13 @@ execute_command (command_t c, bool time_travel)
      	case AND_COMMAND:{
      		command_t left = c->u.command[0];
      		command_t right = c->u.command[1];
-     		//pid_t pid_AND = fork();
-     		//Execute the left side
      		execute_command(left,time_travel);
-     			//if (left -> type == SIMPLE_COMMAND) {
-				//	waitpid(pid_AND, &status, 0);
-				//	left -> status = WEXITSTATUS(status);
-				//}
 			c->status = left->status;
 			//If left side exits with 0, then we execute right side
 			if(left->status == 0){
 				execute_command(right,time_travel);
-				///if (right -> type == SIMPLE_COMMAND) {
-				//	waitpid(pid_AND, &status, 0);
-				//	right -> status = WEXITSTATUS(status);
+				c->status = right->status;
 				}
-			c->status = right->status;
 			break;
      	}
 	    case OR_COMMAND:{     		
@@ -109,8 +100,8 @@ execute_command (command_t c, bool time_travel)
 			c->status = left->status;
 			if(left->status != 0){
 				execute_command(right,time_travel);
+				c->status = right->status;
 				}
-			c->status = right->status;
 			break;
 		}
 	    case PIPE_COMMAND:{
@@ -124,6 +115,7 @@ execute_command (command_t c, bool time_travel)
 		    	dup2(fd[1],1);
 		    	close(fd[1]);
 		    	execute_command(left,time_travel);
+		    	exit(0);
 		    }
 		    else{
 		    	close(fd[1]);
