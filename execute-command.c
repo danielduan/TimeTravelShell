@@ -77,6 +77,7 @@ execute_command (command_t c, bool time_travel)
 			else{
 				waitpid(pid,&status,0);
 			}
+			c->status = status;
 			break;
      	}
      	case AND_COMMAND:{

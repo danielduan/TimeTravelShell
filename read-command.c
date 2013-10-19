@@ -485,7 +485,7 @@ command_t make_command(token_container* list) {
           command_t words = peek(&operators);
           words->u.word = NULL;
           pop(&operators);
-          printf("%s %i %s\n", "and or pipe", words->type, token_iter->_string);
+          //printf("%s %i %s\n", "and or pipe", words->type, token_iter->_string);
           words->input = NULL;
           words->output = NULL;
 
@@ -541,7 +541,7 @@ command_t make_command(token_container* list) {
         
         }
          else {
-          printf("STRING ELSE: %s\n",token_iter->_string);
+          //printf("STRING ELSE: %s\n",token_iter->_string);
 
           //create command_t
           command_t words = (command_t) checked_malloc(sizeof(struct command));
