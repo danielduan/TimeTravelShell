@@ -386,7 +386,7 @@ command_t make_command(token_container* list) {
         //printf("STRING: %s\n",token_iter->_string);
         //check of redirect operators are present in operator stack
         if (peek(&operators) != NULL && peek(&operators)->type == SIMPLE_COMMAND) {
-          printf("STRING OP: %s\n",token_iter->_string);
+          //printf("STRING OP: %s\n",token_iter->_string);
           //create command_t from current stuff on stack
           command_t words = peek(&operators);
           pop(&operators);
@@ -400,7 +400,7 @@ command_t make_command(token_container* list) {
           if (token_iter->_next != NULL && token_iter->_next->_type == R_REDIR && words->input != NULL) {
           	words->u.word = peek(&commands)->u.word;
             //pop(&commands);
-            printf("STRING WORD 1: %s\n",token_iter->_string);
+            //printf("STRING WORD 1: %s\n",token_iter->_string);
             size_t origlen = strlen(token_iter->_string);
             char* catword = *(words->u.word);
             //printf("STRING WORD 2: %s\n",token_iter->_string);
@@ -427,7 +427,7 @@ command_t make_command(token_container* list) {
             //printf("STRING WORD 4: %s\n",catword);
           } else { //no redir out
           	//check if input or output and set params
-            printf("STRING WORD ELSE: %s\n",token_iter->_string);
+            //printf("STRING WORD ELSE: %s\n",token_iter->_string);
   		      if (words->input != NULL) {
   		        words->input = token_iter->_string;
   		      } 
@@ -485,38 +485,39 @@ command_t make_command(token_container* list) {
           command_t words = peek(&operators);
           words->u.word = NULL;
           pop(&operators);
-          printf("%s %i %s\n", "and or pipe", words->type, token_iter->_string);
+          //printf("%s %i %s\n", "and or pipe", words->type, token_iter->_string);
           words->input = NULL;
           words->output = NULL;
 
           //printf("STRING OP WORD: %s\n",token_iter->_string);
+          //*******************************************
+          // here's the swap code
+          //*******************************************
           // if pipe, check for previous command on stack
-          if (words->type == PIPE_COMMAND) {
+          if (words->type == PIPE_COMMAND && (peek(&commands)->type == AND_COMMAND || peek(&commands)->type == OR_COMMAND)) {
             //check if command stack has AND or OR previously
-            if (peek(&commands)->type == AND_COMMAND || peek(&commands)->type == OR_COMMAND) {
-              //needs to be reordered
-              //printf("%s %i %i\n", "pipe, needs reordering", words->type, peek(&commands)->type);
-              command_t prev = peek(&commands);
-              pop(&commands);
-              words->u.command[0] = prev->u.command[1];
+            //needs to be reordered
+            //printf("%s %i %i\n", "pipe, needs reordering", words->type, peek(&commands)->type);
+            command_t prev = peek(&commands);
+            pop(&commands);
+            words->u.command[0] = prev->u.command[1];
 
-              //create operators
-              command_t nwords = (command_t) checked_malloc(sizeof(struct command));
-              nwords->type = SIMPLE_COMMAND;
-              char** dblptr = (char**)checked_malloc(sizeof(char*));
-              *dblptr = (char*)(token_iter->_string);
-              nwords->u.word = dblptr;
-              //needs rework
-              nwords->input = NULL;
-              nwords->output = NULL;
+            //create operators
+            command_t nwords = (command_t) checked_malloc(sizeof(struct command));
+            nwords->type = SIMPLE_COMMAND;
+            char** dblptr = (char**)checked_malloc(sizeof(char*));
+            *dblptr = (char*)(token_iter->_string);
+            nwords->u.word = dblptr;
+            //needs rework
+            nwords->input = NULL;
+            nwords->output = NULL;
 
-              words->u.command[1] = nwords;
+            words->u.command[1] = nwords;
 
-              prev->u.command[1] = words;
+            prev->u.command[1] = words;
 
-              push(&commands, prev);
-            }
-
+            push(&commands, prev);
+            
           }
           else {
             words->u.command[0] = peek(&commands);
@@ -541,7 +542,7 @@ command_t make_command(token_container* list) {
         
         }
          else {
-          printf("STRING ELSE: %s\n",token_iter->_string);
+          //printf("STRING ELSE: %s\n",token_iter->_string);
 
           //create command_t
           command_t words = (command_t) checked_malloc(sizeof(struct command));
@@ -718,6 +719,7 @@ command_t make_command(token_container* list) {
 
   //iterate through list of operators and pop them
   while(peek(&operators) != NULL) {
+    //printf("%s\n", "last push");
     //*******************************************
     //need to do swapping for precedence here too
     //*******************************************
@@ -725,13 +727,29 @@ command_t make_command(token_container* list) {
     pop(&operators);
     words->u.command[1] = peek(&commands);
     pop(&commands);
-    words->u.command[0] = peek(&commands);
-    pop(&commands);
-    if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
-      //printf("%s\n", "operator stack is NULL");
-      return NULL;
+    if (words->type == PIPE_COMMAND && (peek(&commands)->type == AND_COMMAND || peek(&commands)->type == OR_COMMAND)) {
+      //check if command stack has AND or OR previously
+      
+      command_t prev = peek(&commands);
+      pop(&commands);
+      words->u.command[0] = prev->u.command[1];
+      prev->u.command[1] = words;
+
+      if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
+        //printf("%s\n", "operator stack is NULL");
+        return NULL;
+      }
+      push(&commands, prev);
+    } else {
+      //printf("%s\n", "last push");
+      words->u.command[0] = peek(&commands);
+      pop(&commands);
+      if (words->u.command[0] == NULL || words->u.command[1] == NULL) {
+        //printf("%s\n", "operator stack is NULL");
+        return NULL;
+      }
+      push(&commands, words);
     }
-    push(&commands, words);
   }
 
   command_t output = (command_t)checked_malloc(sizeof(struct command));
