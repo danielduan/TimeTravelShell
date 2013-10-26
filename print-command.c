@@ -29,7 +29,10 @@ command_indented_print (int indent, command_t c)
       {
 	char **w = c->u.word;
 	printf ("%*s%s", indent, "", *w);
+<<<<<<< HEAD
   //Our 1A portion deals with this differently
+=======
+>>>>>>> fd5c22530c1c0a1ab7d634de619ac1e2c60b7104
 	//while (*++w)
 	//  printf (" %s", *w);
 	break;
@@ -42,8 +45,12 @@ command_indented_print (int indent, command_t c)
       break;
 
     default:
+<<<<<<< HEAD
       //NEEDED TO GET RID OF THIS TO FIX WEIRD BUG IN 1A
       //abort ();
+=======
+      //  abort ();
+>>>>>>> fd5c22530c1c0a1ab7d634de619ac1e2c60b7104
       ;
     }
 
