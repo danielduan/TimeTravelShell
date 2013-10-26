@@ -990,6 +990,8 @@ make_command_stream (int (*get_next_byte) (void *),
   while(tokens != NULL){
     //printf("%s\n","NOT NULL");
     command_list->_size++;
+    //printf("%s", "THE SIZE IS ");
+    //printf("%i\n", command_list->_size);
     command_list->commands[command_list->_size] = make_command(tokens);
     token_container* del = tokens;
     tokens = (token_container*)tokens->_next_tokens;
@@ -1005,7 +1007,9 @@ read_command_stream (command_stream_t s)
 {
   /* FIXME: Replace this with your implementation too.  */
   //error (1, 0, "command reading not yet implemented");
-    if(s->_iterator > s->_size)
+    //printf("%s", "THE ITERATOR IS ");
+    //printf("%i\n", s->_iterator);
+  if(s->_iterator > s->_size)
     return NULL;
   return s->commands[(s->_iterator++)];
 }

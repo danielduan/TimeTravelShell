@@ -46,6 +46,7 @@ execute_command (command_t c, bool time_travel)
      add auxiliary functions and otherwise modify the source code.
      You can also use external functions defined in the GNU C Library.  */
 
+     //WHEN TIME_TRAVEL IS FALSE:
      int fd[2]; // Used for PIPE
      int stdin_copy = dup(0);
 	 int stdout_copy = dup(1);
@@ -134,14 +135,12 @@ execute_command (command_t c, bool time_travel)
 				if(fd[0]<0)
 					exit(1);
 				dup2(fd[0],0);
-				close(fd[0]);
 			}
 			if(c->output){
 				fd[1] = open(c->output,O_WRONLY | O_TRUNC| O_CREAT, 064);
 				if(fd[1]<0)
 					exit(1);
 				dup2(fd[1],1);
-				close(fd[0]);
 			}
 	    	execute_command(c->u.subshell_command,time_travel);
 	    	c->status = c->u.subshell_command->status;
@@ -156,7 +155,7 @@ execute_command (command_t c, bool time_travel)
 	    }
      	default:
      	//Error, should never get to default case
-     	error(1,0,"Error with executing command");
+     	//error(1,0,"Error with executing command");
      	return;
      }
 
@@ -166,4 +165,25 @@ execute_command (command_t c, bool time_travel)
 	 close(stdin_copy);
 	 close(stdout_copy);
 
+}
+
+command_t run_time_travel(command_stream_t s)
+{
+	int status;
+	bool time_travel = false;
+	command_t last_command = NULL;
+	command_t command;
+	while ((command = read_command_stream (s))){
+		pid_t pid = fork();
+		if(pid == 1)
+			exit(1);
+		else if(pid == 0){
+			execute_command(command,time_travel);
+			exit(1);
+		}
+		last_command = command;
+	}
+	pid_t finished = waitpid(-1,&status,0);
+
+	return last_command;
 }

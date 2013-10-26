@@ -21,6 +21,9 @@ void print_command (command_t);
 /* Execute a command.  Use "time travel" if the flag is set.  */
 void execute_command (command_t, bool);
 
+/* Executes our command stream in time travel*/
+command_t run_time_travel(command_stream_t stream);
+
 /* Return the exit status of a command, which must have previously
    been executed.  Wait for the command, if it is not already finished.  */
 int command_status (command_t);
